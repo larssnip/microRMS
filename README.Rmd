@@ -1,0 +1,21 @@
+---
+title: "README"
+author: "Lars Snipen"
+date: "9 juli 2019"
+output: 
+  github_document:
+    html_preview: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Installation
+Start R and run
+```{r, eval=FALSE}
+devtools::github_install("larssnip/microRMS")
+```
+
+
+
