@@ -4,45 +4,50 @@
 \alias{readMapper}
 \title{Mapping reads}
 \usage{
-readMapper(sample.files, centroids.file, identity, tmp.dir = ".",
-  threads = 1, min.length = 30, unmapped.dir = NULL,
-  verbose = TRUE)
+readMapper(sample.files, centroids.file, identity = 0.99, threads = 1,
+  min.length = 30, verbose = TRUE, tmp.dir = NULL,
+  unmapped.dir = NULL)
 }
 \arguments{
-\item{sample.files}{A vector of filenames, see details below.}
+\item{sample.files}{A vector of FASTA-filenames (text).}
 
-\item{centroids.file}{A filename, see details below.}
+\item{centroids.file}{A FASTA-filename (text).}
 
-\item{identity}{Identity (numeric, 0.0-1.0) threshold for mapping.}
+\item{identity}{Identity threshold for mapping (0.0-1.0).}
 
-\item{threads}{Number of threads to be used by VSEARCH.}
+\item{threads}{Number of threads to be used by vsearch (integer).}
 
-\item{min.length}{Minimum fragment length (bases).}
+\item{min.length}{Minimum fragment length used by vsearch (integer).}
 
-\item{unmapped.dir}{If supplied, a directory to put non-mapped reads.}
+\item{verbose}{Turn on/off output text during processing (logical).}
 
-\item{verbose}{Logical, if TRUE text is written to the Console during computations.}
+\item{tmp.dir}{If supplied, the output directory used by vsearch.}
+
+\item{unmapped.dir}{If supplied, a directory to output unmapped reads.}
 }
 \value{
-A
+A matrix of read-counts, with one row for each fragment cluster and one column for each
+sample file.
 }
 \description{
 Mapping reads to an RMS database using VSEARCH
 }
 \details{
-The \code{sample.files} must be a vector of (full path) names of FASTA-files containing
+The \code{sample.files} must be a vector of names of FASTA-files containing
 the reads from the samples. The \code{centroids.file} is the name of a FASTA-file with the
 database centroids to map against. Thus, the reads from each sample will be mapped to these
-sequences, using the \code{identity} threshold. This results in a table of read-counts. The \code{sample.files}
-are used as column names in this table. The first token in the Headers of the \code{centroids.file} are
-used as row names.
+sequences, using the \code{identity} threshold.
+
+This results in a matrix of read-counts. The column names of this matrix are the filenames in
+\code{sample.files}, after the removal of the path and the file extension. The first token in
+the Headers of the \code{centroids.file} are used as row names.
 }
 \examples{
 more here.
 
 }
 \seealso{
-This is version latest
+\code{\link{RMSdbase}}, \code{\link{rmscols}}.
 }
 \author{
 Lars Snipen.

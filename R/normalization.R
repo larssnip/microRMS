@@ -17,8 +17,7 @@
 #'
 #' @seealso more here.
 #'
-#' @importFrom microseq readFasta
-#' @importFrom micropan gff2fasta
+#' @importFrom microseq readFasta gff2fasta
 #' @importFrom stringr str_c
 #' @importFrom dplyr mutate filter
 #'

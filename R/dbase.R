@@ -3,16 +3,16 @@
 #'
 #' @description Constructs a database of information about a set of RMS fragments.
 #'
-#' @param fragment.file A FASTA-file with all the RMS fragments.
-#' @param identity The sequence identity for clustering fragments.
-#' @param min.length Minimum fragment length (bases).
-#' @param max.length Maximum fragment length (bases).
-#' @param verbose Logical to turn on/off output text during processing.
-#' @param threads Number of threads to be used by \code{vsearch}.
+#' @param fragment.file A FASTA-file with all the RMS fragments (text).
+#' @param identity The sequence identity for clustering fragments (0.0-1.0).
+#' @param min.length Minimum fragment length (integer).
+#' @param max.length Maximum fragment length (integer).
+#' @param verbose Turn on/off output text during processing (logical).
+#' @param threads Number of threads to be used by \code{vsearch} (integer).
 #'
-#' @details The \code{fragment.file} must be a FASTA-file containing all fragments to be clustered. The first token
-#' of each Header-line must indicate the genome of its origin. It must follow the pattern <genome.ID>_RMSx, where
-#' <genome.ID> is some text unique to each genome, and x
+#' @details The \code{fragment.file} must be a FASTA-file containing all fragments to be clustered.
+#' The first token of each Header-line must indicate the genome of its origin. It must follow the
+#' pattern <genome.ID>_RMSx, where <genome.ID> is some text unique to each genome, and x
 #' is some integer. See \code{\link{getRMSfragments}} for how to make such FASTA-files.
 #'
 #' @return A list with the following objects: \code{Cluster.tbl}, \code{Cpn.mat}
@@ -26,34 +26,52 @@
 #' The \code{Cpn.mat} is the copy number matrix, implemented as a sparse dgeMatrix from the
 #' \code{\link{Matrix}} package. It has one row for each fragment cluster and one column
 #' for each genome. This is the central data structure for de-convolving the genome
-#' content from read-count data, see \code{\link{deconvolve}}.
+#' content from read-count data, see \code{\link{rmscols}}.
 #'
-#' The \code{Genome.tbl} is a \code{\link{tibble}} with a row for each genome, and the
-#' total number and number of unique fragment clusters for each genome.
+#' The \code{Genome.tbl} is a \code{\link{tibble}} with a row for each genome, their
+#' number of clusters and the number of unique fragment clusters to each genome.
 #'
 #'
 #' @author Lars Snipen.
 #'
-#' @seealso This is version latest
+#' @seealso \code{\link{getRMSfragments}}.
 #'
-#' @importFrom microseq gregexpr
+#' @importFrom microseq readFasta
 #' @importFrom data.table fread
 #' @importFrom Matrix Matrix rowSums colSums
-#' @importFrom stringr word str_c
-#' @importFrom dplyr mutate filter select
+#' @importFrom stringr word str_length str_remove str_c
+#' @importFrom dplyr mutate filter select group_by slice summarise
 #' @importFrom tibble tibble
 #'
-#' @examples more here.
-#'
+#' @examples
+#' \dontrun{
+#' # Some fragment files in this package
+#' xpth <- file.path(path.package("microrms"),"extdata")
+#' frg.files <- file.path(xpth, list.files(xpth, pattern = ".frg"))
+#' 
+#' # Merging all fragments into one file
+#' tmp.frg.file <- tempfile(pattern = "all", fileext = ".frg")
+#' ok <- file.append(tmp.frg.file, frg.files)
+#' 
+#' # RMSdbase needs the external software vsearch
+#' rms.db <- RMSdbase(tmp.frg.file)
+#' print(rms.db$Genome.tbl)
+#' 
+#' # clean up
+#' ok <- file.remove(tmp.frg.file)
+#' }
+#' 
 #' @export RMSdbase
 #'
-RMSdbase <- function(fragment.file, identity = 0.97, min.length = 30, max.length = 500,
+RMSdbase <- function(fragment.file, identity = 0.99, min.length = 30, max.length = 500,
                      verbose = TRUE, threads = 1){
   quiet <- "--quiet"
   if(verbose) quiet <- ""
 
   ### The VSEARCH clustering
   if(verbose) cat("VSEARCH clustering...\n")
+  ctr.file <- tempfile(pattern = "centroide", fileext = ".fasta")
+  uc.file <- tempfile(pattern = "uc", fileext = ".txt")
   cmd <- paste("vsearch", quiet,
                "--threads", threads,
                "--cluster_fast", fragment.file,
@@ -65,13 +83,13 @@ RMSdbase <- function(fragment.file, identity = 0.97, min.length = 30, max.length
                "--strand plus --sizeout",
                "--relabel CLST",
                "--relabel_keep",
-               "--uc", "uc.txt",
-               "--centroids", "centr.fa")
+               "--uc", uc.file,
+               "--centroids", ctr.file)
   system(cmd)
-  readFasta("centr.fa") %>%
+  readFasta(ctr.file) %>%
     mutate(Cluster = word(Header, 1, 1, sep = ";")) -> centroids
   if(verbose) cat("...produced", nrow(centroids), "clusters\n...the cluster table...")
-  fread("uc.txt", sep = "\t", header = F, drop = c(3,4,5,6,7,8,10), data.table = F) %>%
+  fread(uc.file, sep = "\t", header = F, drop = c(3,4,5,6,7,8,10), data.table = F) %>%
     filter(V1 != "C") %>%
     select(Cluster = V2, Tag = V9) %>%
     mutate(Cluster = Cluster + 1) %>%
@@ -110,7 +128,7 @@ RMSdbase <- function(fragment.file, identity = 0.97, min.length = 30, max.length
                        N.unique = Matrix::colSums(pau))
 
   ### Cleaning up
-  file.remove("uc.txt", "centr.fa")
+  file.remove(ctr.file, uc.file)
   rmsdb.obj <- list(Cluster.tbl = cluster.tbl,
                     Cpn.mat = cpn,
                     Genome.tbl = genome.tbl)
@@ -118,8 +136,12 @@ RMSdbase <- function(fragment.file, identity = 0.97, min.length = 30, max.length
   return(rmsdb.obj)
 }
 
-
-
+# local function
 baseCount <- function(seq, bases){
   return(sapply(strsplit(seq, split = ""), function(x){sum(x %in% bases)}))
 }
+
+
+
+
+

@@ -5,25 +5,23 @@
 \title{Retrieving RMS fragments from genomes}
 \usage{
 getRMSfragments(genome, genome.ID = NULL, min.length = 30,
-  max.length = 500, left = "GAATTC", right = "TTAA",
-  verbose = TRUE, trim = TRUE)
+  max.length = 500, left = "G|AATTC", right = "T|TAA",
+  verbose = TRUE)
 }
 \arguments{
 \item{genome}{A \code{\link{Fasta}} object with genome data.}
 
-\item{genome.ID}{Unique text identifier for each genome, will be added to FASTA-headers.}
+\item{genome.ID}{Unique identifier for each genome, will be added to FASTA-headers (text).}
 
-\item{min.length}{Minimum amplicon length (bases).}
+\item{min.length}{Minimum fragment length (integer).}
 
-\item{max.length}{Maximum amplicon length (bases).}
+\item{max.length}{Maximum fragment length (integer).}
 
-\item{left}{Text with first, long, restriction enzyme cut motif. Deafult is the EcoRI.}
+\item{left}{Text with first, long, restriction enzyme cut motif (text).}
 
-\item{right}{Text with second, short, restriction enzyme cut motif. Deafult is the MseI.}
+\item{right}{Text with second, short, restriction enzyme cut motif (text).}
 
-\item{verbose}{Logical to turn on/off output text during processing.}
-
-\item{trim}{Logical indicating if the restriction motifs above should be trimmed off the ends of the fragments. Default is \code{TRUE}}
+\item{verbose}{Turn on/off output text during processing (logical).}
 }
 \value{
 A \code{\link{Fasta}} object with all fragment sequences (5'-3').
@@ -32,22 +30,31 @@ A \code{\link{Fasta}} object with all fragment sequences (5'-3').
 Retrieves a set of fragments from a genome, given restriction enzyme cutting motifs.
 }
 \details{
-This function is used to find and retrieve all RMS fragments from a genome. A \code{\link{Fasta}}-object
-with the genome sequence(s) is required. A \code{genome.ID} may/should be supplied, and will be added to the header-lines of the output
-\code{\link{Fasta}} object to identify the origin of the fragments. All retrieved fragments will then get
-a FASTA-header starting with the token <genome.ID>_RMSx, where x is an integer (1,2,...,). This first token is followed
-by a blank. This ensures that all first tokens are unique and that the genome of its origin is indicated.
+This function is used to find and retrieve all RMS fragments from a genome.
+A \code{\link{Fasta}}-object with the genome sequence(s) is required. A \code{genome.ID}, if
+supplied, will be added to the FASTA headers of the output, which is useful if you want to trace
+the origin of the fragments. All retrieved fragments will then get a FASTA-header starting with the
+token <genome.ID>_RMSx, where x is an integer (1,2,...,). This first token is followed by a blank.
+This ensures that all first tokens are unique and that the genome of its origin is indicated.
 
-The default restriction enzymes are EcoRI and MseI,
-with cutting motifs \code{"GAATTC"} and \code{"TTAA"}, respectively. Change cutting motifs accordingly if
-you use other restriction enzymes.
+The default restriction enzymes are EcoRI and MseI, with cutting motifs \code{"G|AATTC"} and
+\code{"T|TAA"}, respectively. The vertical bar indicates where in the motif the enzyme cuts. The
+forward primers are ligated to the left
 }
 \examples{
-more here.
+# A small genome in this package
+xpth <- file.path(path.package("microrms"),"extdata")
+genome.file <- file.path(xpth,"GCF_000009605.1_ASM960v1_genomic.fna")
+
+# Read genome, find fragments
+gnm <- readFasta(genome.file)
+frg <- getRMSfragments(gnm, genome.ID = "my.ID")
+
+# Write to file with writeFasta(frg, out.file = <filename>)
 
 }
 \seealso{
-more here.
+\code{\link{RMSdbase}}.
 }
 \author{
 Lars Snipen.

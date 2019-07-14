@@ -1,7 +1,6 @@
 ---
-title: "README"
+title: "The microRMS R package"
 author: "Lars Snipen"
-date: "9 juli 2019"
 output: 
   github_document:
     html_preview: yes
@@ -17,5 +16,5 @@ Start R and run
 devtools::github_install("larssnip/microRMS")
 ```
 
-
+Several of the R functions calls upon the software VSEARCH that must be installed and available on the system, see [VSEARCH on GitHub](https://github.com/torognes/vsearch).
 

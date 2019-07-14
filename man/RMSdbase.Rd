@@ -4,21 +4,21 @@
 \alias{RMSdbase}
 \title{Constructing RMS database}
 \usage{
-RMSdbase(fragment.file, identity = 0.97, min.length = 30,
+RMSdbase(fragment.file, identity = 0.99, min.length = 30,
   max.length = 500, verbose = TRUE, threads = 1)
 }
 \arguments{
-\item{fragment.file}{A FASTA-file with all the RMS fragments.}
+\item{fragment.file}{A FASTA-file with all the RMS fragments (text).}
 
-\item{identity}{The sequence identity for clustering fragments.}
+\item{identity}{The sequence identity for clustering fragments (0.0-1.0).}
 
-\item{min.length}{Minimum fragment length (bases).}
+\item{min.length}{Minimum fragment length (integer).}
 
-\item{max.length}{Maximum fragment length (bases).}
+\item{max.length}{Maximum fragment length (integer).}
 
-\item{verbose}{Logical to turn on/off output text during processing.}
+\item{verbose}{Turn on/off output text during processing (logical).}
 
-\item{threads}{Number of threads to be used by \code{vsearch}.}
+\item{threads}{Number of threads to be used by \code{vsearch} (integer).}
 }
 \value{
 A list with the following objects: \code{Cluster.tbl}, \code{Cpn.mat}
@@ -32,26 +32,41 @@ and its \code{Header}, making it possible to write the table to a FASTA-file usi
 The \code{Cpn.mat} is the copy number matrix, implemented as a sparse dgeMatrix from the
 \code{\link{Matrix}} package. It has one row for each fragment cluster and one column
 for each genome. This is the central data structure for de-convolving the genome
-content from read-count data, see \code{\link{deconvolve}}.
+content from read-count data, see \code{\link{rmscols}}.
 
-The \code{Genome.tbl} is a \code{\link{tibble}} with a row for each genome, and the
-total number and number of unique fragment clusters for each genome.
+The \code{Genome.tbl} is a \code{\link{tibble}} with a row for each genome, their
+number of clusters and the number of unique fragment clusters to each genome.
 }
 \description{
 Constructs a database of information about a set of RMS fragments.
 }
 \details{
-The \code{fragment.file} must be a FASTA-file containing all fragments to be clustered. The first token
-of each Header-line must indicate the genome of its origin. It must follow the pattern <genome.ID>_RMSx, where
-<genome.ID> is some text unique to each genome, and x
+The \code{fragment.file} must be a FASTA-file containing all fragments to be clustered.
+The first token of each Header-line must indicate the genome of its origin. It must follow the
+pattern <genome.ID>_RMSx, where <genome.ID> is some text unique to each genome, and x
 is some integer. See \code{\link{getRMSfragments}} for how to make such FASTA-files.
 }
 \examples{
-more here.
+\dontrun{
+# Some fragment files in this package
+xpth <- file.path(path.package("microrms"),"extdata")
+frg.files <- file.path(xpth, list.files(xpth, pattern = ".frg"))
+
+# Merging all fragments into one file
+tmp.frg.file <- tempfile(pattern = "all", fileext = ".frg")
+ok <- file.append(tmp.frg.file, frg.files)
+
+# RMSdbase needs the external software vsearch
+rms.db <- RMSdbase(tmp.frg.file)
+print(rms.db$Genome.tbl)
+
+# clean up
+ok <- file.remove(tmp.frg.file)
+}
 
 }
 \seealso{
-This is version latest
+\code{\link{getRMSfragments}}.
 }
 \author{
 Lars Snipen.

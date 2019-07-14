@@ -4,43 +4,53 @@
 #' @description Retrieves a set of fragments from a genome, given restriction enzyme cutting motifs.
 #'
 #' @param genome A \code{\link{Fasta}} object with genome data.
-#' @param genome.ID Unique text identifier for each genome, will be added to FASTA-headers.
-#' @param min.length Minimum amplicon length (bases).
-#' @param max.length Maximum amplicon length (bases).
-#' @param verbose Logical to turn on/off output text during processing.
-#' @param left Text with first, long, restriction enzyme cut motif. Deafult is the EcoRI.
-#' @param right Text with second, short, restriction enzyme cut motif. Deafult is the MseI.
-#' @param trim Logical indicating if the restriction motifs above should be trimmed off the ends of the fragments. Default is \code{TRUE}
+#' @param genome.ID Unique identifier for each genome, will be added to FASTA-headers (text).
+#' @param min.length Minimum fragment length (integer).
+#' @param max.length Maximum fragment length (integer).
+#' @param verbose Turn on/off output text during processing (logical).
+#' @param left Text with first, long, restriction enzyme cut motif (text).
+#' @param right Text with second, short, restriction enzyme cut motif (text).
 #'
-#' @details This function is used to find and retrieve all RMS fragments from a genome. A \code{\link{Fasta}}-object
-#' with the genome sequence(s) is required. A \code{genome.ID} may/should be supplied, and will be added to the header-lines of the output
-#' \code{\link{Fasta}} object to identify the origin of the fragments. All retrieved fragments will then get
-#' a FASTA-header starting with the token <genome.ID>_RMSx, where x is an integer (1,2,...,). This first token is followed
-#' by a blank. This ensures that all first tokens are unique and that the genome of its origin is indicated.
+#' @details This function is used to find and retrieve all RMS fragments from a genome.
+#' A \code{\link{Fasta}}-object with the genome sequence(s) is required. A \code{genome.ID}, if
+#' supplied, will be added to the FASTA headers of the output, which is useful if you want to trace
+#' the origin of the fragments. All retrieved fragments will then get a FASTA-header starting with the
+#' token <genome.ID>_RMSx, where x is an integer (1,2,...,). This first token is followed by a blank.
+#' This ensures that all first tokens are unique and that the genome of its origin is indicated.
 #'
-#' The default restriction enzymes are EcoRI and MseI,
-#' with cutting motifs \code{"GAATTC"} and \code{"TTAA"}, respectively. Change cutting motifs accordingly if
-#' you use other restriction enzymes.
+#' The default restriction enzymes are EcoRI and MseI, with cutting motifs \code{"G|AATTC"} and
+#' \code{"T|TAA"}, respectively. The vertical bar indicates where in the motif the enzyme cuts. The
+#' forward primers are ligated to the left
 #'
 #' @return A \code{\link{Fasta}} object with all fragment sequences (5'-3').
 #'
 #' @author Lars Snipen.
 #'
-#' @seealso more here.
+#' @seealso \code{\link{RMSdbase}}.
 #'
-#' @importFrom microseq readFasta
-#' @importFrom micropan gff2fasta
-#' @importFrom stringr str_c
+#' @importFrom microseq readFasta gff2fasta
+#' @importFrom stringr str_c str_remove_all
 #' @importFrom dplyr mutate filter
 #'
-#' @examples more here.
+#' @examples
+#' # A small genome in this package
+#' xpth <- file.path(path.package("microrms"),"extdata")
+#' genome.file <- file.path(xpth,"GCF_000009605.1_ASM960v1_genomic.fna")
+#' 
+#' # Read genome, find fragments
+#' gnm <- readFasta(genome.file)
+#' frg <- getRMSfragments(gnm, genome.ID = "my.ID")
 #'
+#' # Write to file with writeFasta(frg, out.file = <filename>)
+#' 
 #' @export getRMSfragments
 #'
 getRMSfragments <- function(genome, genome.ID = NULL, min.length = 30, max.length = 500,
-                            left = "GAATTC", right = "TTAA", verbose = TRUE, trim = TRUE){
+                            left = "G|AATTC", right = "T|TAA", verbose = TRUE){
   if(verbose) cat("getRMSfragments: ")
-  gff <- getRMS(genome, left, right, trim)
+  lft <- str_remove_all(left, "\\|")
+  rght <- str_remove_all(right, "\\|")
+  gff <- getRMS(genome, lft, rght)
   if(nrow(gff)>0){
     gff %>%
       mutate(Length = abs(Start - End) + 1) %>%
@@ -51,6 +61,10 @@ getRMSfragments <- function(genome, genome.ID = NULL, min.length = 30, max.lengt
       if(!is.null(genome.ID)){
         fsa$Header <- str_c(str_c(genome.ID, str_c("RMS", 1:nrow(fsa)), sep = "_"), fsa$Header, sep = " ")
       }
+      ct.lft <- str_length(str_remove(left, "\\|.+"))
+      ct.rght <- str_length(str_remove(right, "\\|.+"))
+      fsa %>% 
+        mutate(Sequence = str_sub(Sequence, ct.lft+1, -(ct.rght+1))) -> fsa
     } else {
       if(verbose) cat("found no RMS-fragments within min and max length!\n")
     }
@@ -65,7 +79,7 @@ getRMSfragments <- function(genome, genome.ID = NULL, min.length = 30, max.lengt
 
 
 ### Local function
-getRMS <- function(genome, long = "GAATTC", short = "TTAA", trim = TRUE){
+getRMS <- function(genome, left, right){
   require(stringr)
   gff <- data.frame(Seqid      = NULL,
                     Source     = NULL,
@@ -79,20 +93,15 @@ getRMS <- function(genome, long = "GAATTC", short = "TTAA", trim = TRUE){
                     stringsAsFactors = F)
   ### looping over genome-sequences
   for(i in 1:nrow(genome)){
-    long.m <- str_locate_all(genome$Sequence[i], pattern = long)[[1]]
-    short.m <- str_locate_all(genome$Sequence[i], pattern = short)[[1]]
-    if(length(long.m) > 0 & length(short.m) > 0){
+    left.m <- str_locate_all(genome$Sequence[i], pattern = left)[[1]]
+    right.m <- str_locate_all(genome$Sequence[i], pattern = right)[[1]]
+    if(length(left.m) > 0 & length(right.m) > 0){
       ### positive strand
-      if(trim){
-        lng <- long.m[,2] + 1
-        shrt <- short.m[,1] - 1
-      } else {
-        lng <- long.m[,1]
-        shrt <- short.m[,2]
-      }
-      lft.rght <- t(sapply(lng, function(ll){
-        ll2 <- suppressWarnings(min(lng[lng > ll]))
-        ss <- suppressWarnings(min(shrt[shrt > ll]))
+      lft <- left.m[,1]
+      rght <- right.m[,2]
+      lft.rght <- t(sapply(lft, function(ll){
+        ll2 <- suppressWarnings(min(lft[lft > ll]))
+        ss <- suppressWarnings(min(rght[rght > ll]))
         return(c(ll, ifelse(ss < ll2, ss, Inf)))
       }))
       nf <- nrow(lft.rght)
@@ -109,16 +118,11 @@ getRMS <- function(genome, long = "GAATTC", short = "TTAA", trim = TRUE){
                                      stringsAsFactors = F))
       }
       ### negative strand
-      if(trim){
-        lng <- long.m[,1] - 1
-        shrt <- short.m[,2] + 1
-      } else {
-        lng <- long.m[,2]
-        shrt <- short.m[,1]
-      }
-      lft.rght <- t(sapply(lng, function(ll){
-        ll2 <- suppressWarnings(max(lng[lng < ll]))
-        ss <- suppressWarnings(max(shrt[shrt < ll]))
+      lft <- left.m[,2]
+      rght <- right.m[,1]
+      lft.rght <- t(sapply(lft, function(ll){
+        ll2 <- suppressWarnings(max(lft[lft < ll]))
+        ss <- suppressWarnings(max(rght[rght < ll]))
         return(c(ifelse(ss > ll2, ss, -Inf), ll))
       }))
       nn <- nrow(lft.rght)
