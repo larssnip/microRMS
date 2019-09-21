@@ -45,7 +45,7 @@ This job is done once for each genome, and stored. Thus, if you later want to ad
 
 ### Making the database
 This means we collect all fragments from the genomes. First, we write all genome-wise fragment files into one temporary fasta file:
-```{r}
+```{r, eval=FALSE}
 for(i in 1:length(fragment.files)){
   ok <- file.append(file.path(tmp.fdir, "all.frg"),
                     genome.files[i], overwrite = T)
@@ -54,7 +54,7 @@ for(i in 1:length(fragment.files)){
 Set `tmp.dir` to some folder of temporary results that you typically delete in the end.
 
 The creation of the database object requires the use of the `vsearch` software for clustering. The function `RMSdbase()` will not work unless `vsearch` is a valid command in your system/computer.
-```{r}
+```{r, eval=FALSE}
 rmsdb.obj <- RMSdbase(file.path(tmp.fdir, "all.frg"),
                       identity = 0.99,
                       min.length = 30,
