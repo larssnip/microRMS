@@ -13,6 +13,8 @@ rmscols(Y, X, trim = 0, reltol = 1e-06, verbose = TRUE)
 
 \item{trim}{Fraction of extreme readcounts to discard when fitting linear model.}
 
+\item{reltol}{Relative stopping tolerance for the iterative constrained leats square search}
+
 \item{verbose}{Logical, if TRUE text is written to the Console during computations.}
 }
 \value{

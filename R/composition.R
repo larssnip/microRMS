@@ -7,6 +7,7 @@
 #' @param Y A matrix of read counts, a column for each sample.
 #' @param X A matrix of amplicon cluster copy numbers, a column for each genome (cluster).
 #' @param trim Fraction of extreme readcounts to discard when fitting linear model.
+#' @param reltol Relative stopping tolerance for the iterative constrained leats square search
 #' @param verbose Logical, if TRUE text is written to the Console during computations.
 #'
 #' @details more here.

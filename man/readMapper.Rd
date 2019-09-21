@@ -43,7 +43,13 @@ This results in a matrix of read-counts. The column names of this matrix are the
 the Headers of the \code{centroids.file} are used as row names.
 }
 \examples{
-more here.
+\dontrun{
+xpth <- file.path(path.package("microrms"),"extdata")
+smp.files <- file.path(xpth, list.files(xpth, pattern = "Sample"))
+ctr.file <- file.path(xpth, "centroids.fasta")
+
+read.counts <- readMapper(smp.files, ctr.file)
+}
 
 }
 \seealso{
