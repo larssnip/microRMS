@@ -3,51 +3,38 @@
 #'
 #' @description Reducing the RMS readcount bias that is due to fragment length.
 #'
-#' @param Y Matrix of readcounts, one row for each fragment cluster, one column for each sample.
-#' @param L Fragment lengths.
-#' @param max.train Integer indicating maximum number of data used to train the loess model
-#' @param trunc Lowest readcount considered as valid when training loess model
+#' @param rms.obj A \code{list} with RMS data structures, see \code{\link{RMSobject}}.
+#' @param max.train Integer indicating maximum number of data points used to train the loess model.
+#' @param readcount.low Lowest readcount considered as valid when training loess model.
 #' @param verbose Logical, if TRUE text is written to the Console during computations.
 #'
-#' @details
+#' @details RMS amplicon signals (readcounts) usually have some bias due to varying lengths. This
+#' function attempts to remove this bias. It has been described in detail in Snipen et al, 2019.
 #'
-#' @return A matrix same size as \code{Y} with corrected readcounts.
+#' @return An rms object similar to \code{rms.obj}, but where the \code{Readcount.mat}
+#' matrix has been normalized, columnwise.
 #'
 #' @author Lars Snipen.
-#'
-#' @seealso more here.
 #'
 #' @importFrom microseq readFasta gff2fasta
 #' @importFrom stringr str_c
 #' @importFrom dplyr mutate filter
 #'
-#' @examples more here.
+#' @examples See tutorial.
 #'
 #' @export normLength
 #'
-normLength <- function(Y, L, max.train = 1000, trunc = 1, verbose = TRUE){
-  for(k in 1:ncol(Y)){
-    if(verbose) cat("Normalizing sample", k, "\r")
-    idx <- which(Y[,k] >= trunc)
+normLength <- function(rms.obj, max.train = 1000, readcount.low = 1, verbose = TRUE){
+  frg.length <- rms.obj$Cluster.tbl$Length
+  for(k in 1:ncol(rms.obj$Readcount.mat)){
+    if(verbose) cat("Normalizing", colnames(rms.obj$Readcount.mat)[k], "\r")
+    idx <- which(rms.obj$Readcount.mat[,k] >= readcount.low)
     idx <- idx[sample(idx, size = min(max.train, length(idx)))]
-    mod <- loess(log2(Y[idx,k]) ~ L[idx], control = loess.control(surface = "direct"))
-    v.hat <- predict(mod, newdata = L)
+    mod <- loess(log2(rms.obj$Readcount.mat[idx,k]) ~ frg.length[idx],
+                 control = loess.control(surface = "direct"))
+    v.hat <- predict(mod, newdata = frg.length)
     ff <- 2^(max(v.hat) - v.hat)
-    Y[,k] <- Y[,k] * ff
+    rms.obj$Readcount.mat[,k] <- rms.obj$Readcount.mat[,k] * ff
   }
-  return(Y)
+  return(rms.obj)
 }
-
-
-
-
-
-# normLibSize <- function(readcount.matrix, N.scale=FALSE){
-#   library.size <- colSums(readcount.matrix, na.rm=T)
-#   if(N.scale){
-#     N.mark <- colSums(readcount.matrix>0, na.rm=T)
-#     library.size <- library.size/N.mark
-#   }
-#   rrc <- t(t(readcount.matrix)/library.size)
-#   return(rrc)
-# }

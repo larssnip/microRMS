@@ -4,35 +4,43 @@
 \alias{rmscols}
 \title{Estimating microbiota composition}
 \usage{
-rmscols(Y, X, trim = 0, reltol = 1e-06, verbose = TRUE)
+rmscols(rms.obj, trim = 0, reltol = 1e-06, verbose = TRUE)
 }
 \arguments{
-\item{Y}{A matrix of read counts, a column for each sample.}
-
-\item{X}{A matrix of amplicon cluster copy numbers, a column for each genome (cluster).}
+\item{rms.obj}{A \code{list} with the matrices \code{Readcount.mat} and \code{Cpn.mat}, see details below.}
 
 \item{trim}{Fraction of extreme readcounts to discard when fitting linear model.}
 
-\item{reltol}{Relative stopping tolerance for the iterative constrained leats square search}
+\item{reltol}{Relative stopping tolerance for the iterative constrained least square search.}
 
 \item{verbose}{Logical, if TRUE text is written to the Console during computations.}
 }
 \value{
-A matrix of the fraction for each genome.
+A matrix with one row for each genome in \code{rms.obj$Cpn.mat} and one column for each 
+sample in \code{rms.obj$Readcount.mat}. Each column contains the estimated relative abundance for 
+all genomes in the corresponding sample.
 }
 \description{
 Estimates the fraction of each genome in a sample, based on read counts and copy
 numbers for each amplicon cluster.
 }
 \details{
-more here.
+The \code{rms.obj} must be a list with the required data structures for performing a 
+Constrained Ordinary Least Square estimation of abundances.
+
+The \code{rms.obj} is typically constructed by the use of \code{\link{RMSobject}}. In this step
+the copy number matrix \code{Cpn.mat} is constructed, based on RMS fragments in a selection
+(database) of genomes.
+
+In addition, a matrix of readcounts from one or more samples is required to be found in
+\code{rms.obj$Readcount.mat}, see \code{\link{readMapper}} and tutorial for more details on this.
 }
 \examples{
-more here.
+See tutorial.
 
 }
 \seealso{
-more here.
+\code{\link{RMSobject}}, \code{\link{readMapper}}.
 }
 \author{
 Lars Snipen.

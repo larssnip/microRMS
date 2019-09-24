@@ -4,14 +4,13 @@
 \alias{getRMSfragments}
 \title{Retrieving RMS fragments from genomes}
 \usage{
-getRMSfragments(genome, genome.ID = NULL, min.length = 30,
-  max.length = 500, left = "G|AATTC", right = "T|TAA",
-  verbose = TRUE)
+getRMSfragments(genome, genome.id, min.length = 30, max.length = 500,
+  left = "G|AATTC", right = "T|TAA", verbose = TRUE)
 }
 \arguments{
 \item{genome}{A \code{\link{Fasta}} object with genome data.}
 
-\item{genome.ID}{Unique identifier for each genome, will be added to FASTA-headers (text).}
+\item{genome.id}{Unique identifier for each genome, will be added to FASTA-headers (text).}
 
 \item{min.length}{Minimum fragment length (integer).}
 
@@ -31,15 +30,14 @@ Retrieves a set of fragments from a genome, given restriction enzyme cutting mot
 }
 \details{
 This function is used to find and retrieve all RMS fragments from a genome.
-A \code{\link{Fasta}}-object with the genome sequence(s) is required. A \code{genome.ID}, if
-supplied, will be added to the FASTA headers of the output, which is useful if you want to trace
-the origin of the fragments. All retrieved fragments will then get a FASTA-header starting with the
-token <genome.ID>_RMSx, where x is an integer (1,2,...,). This first token is followed by a blank.
-This ensures that all first tokens are unique and that the genome of its origin is indicated.
+A \code{\link{Fasta}}-object with the genome sequence(s) is required, as well as a \code{genome.id},
+which is a text unique to each genome to be analyzed. This \code{genome.id} will be added to the
+fasta headers of the output, and all headers start with the token <genome.id>_RMSx, where x is
+an integer (1,2,...,). This first token is followed by a blank. This ensures that all first tokens
+are unique and that the genome of its origin is indicated for all fragments
 
 The default restriction enzymes are EcoRI and MseI, with cutting motifs \code{"G|AATTC"} and
-\code{"T|TAA"}, respectively. The vertical bar indicates where in the motif the enzyme cuts. The
-forward primers are ligated to the left
+\code{"T|TAA"}, respectively. The vertical bar indicates cut site in the motif.
 }
 \examples{
 # A small genome in this package
@@ -48,13 +46,13 @@ genome.file <- file.path(xpth,"GCF_000009605.1_ASM960v1_genomic.fna")
 
 # Read genome, find fragments
 gnm <- readFasta(genome.file)
-frg <- getRMSfragments(gnm, genome.ID = "my.ID")
+frg <- getRMSfragments(gnm, "genome_1")
 
 # Write to file with writeFasta(frg, out.file = <filename>)
 
 }
 \seealso{
-\code{\link{RMSdbase}}.
+\code{\link{RMSobject}}.
 }
 \author{
 Lars Snipen.

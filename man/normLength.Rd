@@ -4,34 +4,32 @@
 \alias{normLength}
 \title{Length-normalization}
 \usage{
-normLength(Y, L, max.train = 1000, trunc = 1, verbose = TRUE)
+normLength(rms.obj, max.train = 1000, readcount.low = 1,
+  verbose = TRUE)
 }
 \arguments{
-\item{Y}{Matrix of readcounts, one row for each fragment cluster, one column for each sample.}
+\item{rms.obj}{A \code{list} with RMS data structures, see \code{\link{RMSobject}}.}
 
-\item{L}{Fragment lengths.}
+\item{max.train}{Integer indicating maximum number of data points used to train the loess model.}
 
-\item{max.train}{Integer indicating maximum number of data used to train the loess model}
-
-\item{trunc}{Lowest readcount considered as valid when training loess model}
+\item{readcount.low}{Lowest readcount considered as valid when training loess model.}
 
 \item{verbose}{Logical, if TRUE text is written to the Console during computations.}
 }
 \value{
-A matrix same size as \code{Y} with corrected readcounts.
+An rms object similar to \code{rms.obj}, but where the \code{Readcount.mat}
+matrix has been normalized, columnwise.
 }
 \description{
 Reducing the RMS readcount bias that is due to fragment length.
 }
 \details{
-
+RMS amplicon signals (readcounts) usually have some bias due to varying lengths. This
+function attempts to remove this bias. It has been described in detail in Snipen et al, 2019.
 }
 \examples{
-more here.
+See tutorial.
 
-}
-\seealso{
-more here.
 }
 \author{
 Lars Snipen.

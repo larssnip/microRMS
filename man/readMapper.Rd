@@ -4,14 +4,13 @@
 \alias{readMapper}
 \title{Mapping reads}
 \usage{
-readMapper(sample.files, centroids.file, identity = 0.99, threads = 1,
-  min.length = 30, verbose = TRUE, tmp.dir = NULL,
-  unmapped.dir = NULL)
+readMapper(rms.obj, fa.dir, identity = 0.99, threads = 1,
+  min.length = 30, verbose = TRUE)
 }
 \arguments{
-\item{sample.files}{A vector of FASTA-filenames (text).}
+\item{rms.obj}{A \code{list} with the tables \code{Sample.tbl} and \code{Cluster.tbl}, see details below.}
 
-\item{centroids.file}{A FASTA-filename (text).}
+\item{fa.dir}{A path to where the fasta files with reads are located.}
 
 \item{identity}{Identity threshold for mapping (0.0-1.0).}
 
@@ -20,17 +19,13 @@ readMapper(sample.files, centroids.file, identity = 0.99, threads = 1,
 \item{min.length}{Minimum fragment length used by vsearch (integer).}
 
 \item{verbose}{Turn on/off output text during processing (logical).}
-
-\item{tmp.dir}{If supplied, the output directory used by vsearch.}
-
-\item{unmapped.dir}{If supplied, a directory to output unmapped reads.}
 }
 \value{
 A matrix of read-counts, with one row for each fragment cluster and one column for each
 sample file.
 }
 \description{
-Mapping reads to an RMS database using VSEARCH
+Mapping reads to clusters in an RMS object using VSEARCH
 }
 \details{
 The \code{sample.files} must be a vector of names of FASTA-files containing
@@ -43,17 +38,11 @@ This results in a matrix of read-counts. The column names of this matrix are the
 the Headers of the \code{centroids.file} are used as row names.
 }
 \examples{
-\dontrun{
-xpth <- file.path(path.package("microrms"),"extdata")
-smp.files <- file.path(xpth, list.files(xpth, pattern = "Sample"))
-ctr.file <- file.path(xpth, "centroids.fasta")
-
-read.counts <- readMapper(smp.files, ctr.file)
-}
+See tutorial.
 
 }
 \seealso{
-\code{\link{RMSdbase}}, \code{\link{rmscols}}.
+\code{\link{RMSobject}}, \code{\link{rmscols}}.
 }
 \author{
 Lars Snipen.

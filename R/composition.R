@@ -4,51 +4,62 @@
 #' @description Estimates the fraction of each genome in a sample, based on read counts and copy
 #' numbers for each amplicon cluster.
 #'
-#' @param Y A matrix of read counts, a column for each sample.
-#' @param X A matrix of amplicon cluster copy numbers, a column for each genome (cluster).
+#' @param rms.obj A \code{list} with the matrices \code{Readcount.mat} and \code{Cpn.mat}, see details below.
 #' @param trim Fraction of extreme readcounts to discard when fitting linear model.
-#' @param reltol Relative stopping tolerance for the iterative constrained leats square search
+#' @param reltol Relative stopping tolerance for the iterative constrained least square search.
 #' @param verbose Logical, if TRUE text is written to the Console during computations.
 #'
-#' @details more here.
+#' @details The \code{rms.obj} must be a list with the required data structures for performing a 
+#' Constrained Ordinary Least Square estimation of abundances.
+#' 
+#' The \code{rms.obj} is typically constructed by the use of \code{\link{RMSobject}}. In this step
+#' the copy number matrix \code{Cpn.mat} is constructed, based on RMS fragments in a selection
+#' (database) of genomes.
+#' 
+#' In addition, a matrix of readcounts from one or more samples is required to be found in
+#' \code{rms.obj$Readcount.mat}, see \code{\link{readMapper}} and tutorial for more details on this.
 #'
-#' @return A matrix of the fraction for each genome.
+#' @return A matrix with one row for each genome in \code{rms.obj$Cpn.mat} and one column for each 
+#' sample in \code{rms.obj$Readcount.mat}. Each column contains the estimated relative abundance for 
+#' all genomes in the corresponding sample. 
 #'
 #' @author Lars Snipen.
 #'
-#' @seealso more here.
+#' @seealso \code{\link{RMSobject}}, \code{\link{readMapper}}.
 #'
 #' @importFrom Matrix crossprod Diagonal
 #' @importFrom stats optim
 #'
-#' @examples more here.
+#' @examples See tutorial.
 #'
 #' @export rmscols
 #'
-rmscols <- function(Y, X, trim = 0, reltol = 1e-6, verbose = TRUE){
-  J <- ncol(Y)
-  C <- nrow(X)
-  G <- ncol(X)
+rmscols <- function(rms.obj, trim = 0, reltol = 1e-6, verbose = TRUE){
+  if(!exists("Readcount.mat", rms.obj)) stop("The rms.obj must contain a Readcount.mat")
+  if(!exists("Cpn.mat", rms.obj)) stop("The rms.obj must contain a Cpn.mat")
+  J <- ncol(rms.obj$Readcount.mat)
+  C <- nrow(rms.obj$Cpn.mat)
+  G <- ncol(rms.obj$Cpn.mat)
   beta.matrix <- matrix(0, nrow = G, ncol = J)
-  rownames(beta.matrix) <- colnames(X)
-  colnames(beta.matrix) <- colnames(Y)
+  rownames(beta.matrix) <- colnames(rms.obj$Cpn.mat)
+  colnames(beta.matrix) <- colnames(rms.obj$Readcount.mat)
   if(trim > 0) residuals <- matrix(0, nrow = C, ncol = J)
   for(j in 1:J){
-    if(verbose) cat("Deconvolving sample", j, "...\n")
+    if(verbose) cat("Deconvolving sample", rms.obj$Sample.tbl$sample_id[j], "...\n")
     w <- rep(1,C)
-    s.hat <- constrLS(Y[,j], X, w, reltol, verbose)
+    s.hat <- constrLS(rms.obj$Readcount.mat[,j], rms.obj$Cpn.mat, w, reltol, verbose)
     
     if(trim > 0){
       if(verbose) cat("Trimming residuals...\n")
-      residuals[,j] <- as.numeric(Y[,j] - X %*% s.hat)
+      residuals[,j] <- as.numeric(rms.obj$Readcount.mat[,j] - rms.obj$Cpn.mat %*% s.hat)
       rsd <- sd(residuals[,j])
       for(g in 1:G){
-        idx <- which(X[,g] > 0)
+        idx <- which(rms.obj$Cpn.mat[,g] > 0)
         qq <- quantile(residuals[idx,j], c(trim/2, 1-trim/2))
         idd <- which(residuals[idx,j] < qq[1] | residuals[idx,j] > qq[2])
         w[idx[idd]] <- 0
       }
-      s.hat <- constrLS(Y[,j], X, w, reltol, verbose)
+      s.hat <- constrLS(rms.obj$Readcount.mat[,j], rms.obj$Cpn.mat, w, reltol, verbose)
     }
     beta.hat <- s.hat/sum(s.hat)
     beta.matrix[,j] <- as.numeric(beta.hat)

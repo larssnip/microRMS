@@ -4,7 +4,7 @@
 #' @description Retrieves a set of fragments from a genome, given restriction enzyme cutting motifs.
 #'
 #' @param genome A \code{\link{Fasta}} object with genome data.
-#' @param genome.ID Unique identifier for each genome, will be added to FASTA-headers (text).
+#' @param genome.id Unique identifier for each genome, will be added to FASTA-headers (text).
 #' @param min.length Minimum fragment length (integer).
 #' @param max.length Maximum fragment length (integer).
 #' @param verbose Turn on/off output text during processing (logical).
@@ -12,24 +12,23 @@
 #' @param right Text with second, short, restriction enzyme cut motif (text).
 #'
 #' @details This function is used to find and retrieve all RMS fragments from a genome.
-#' A \code{\link{Fasta}}-object with the genome sequence(s) is required. A \code{genome.ID}, if
-#' supplied, will be added to the FASTA headers of the output, which is useful if you want to trace
-#' the origin of the fragments. All retrieved fragments will then get a FASTA-header starting with the
-#' token <genome.ID>_RMSx, where x is an integer (1,2,...,). This first token is followed by a blank.
-#' This ensures that all first tokens are unique and that the genome of its origin is indicated.
+#' A \code{\link{Fasta}}-object with the genome sequence(s) is required, as well as a \code{genome.id},
+#' which is a text unique to each genome to be analyzed. This \code{genome.id} will be added to the
+#' fasta headers of the output, and all headers start with the token <genome.id>_RMSx, where x is
+#' an integer (1,2,...,). This first token is followed by a blank. This ensures that all first tokens
+#' are unique and that the genome of its origin is indicated for all fragments
 #'
 #' The default restriction enzymes are EcoRI and MseI, with cutting motifs \code{"G|AATTC"} and
-#' \code{"T|TAA"}, respectively. The vertical bar indicates where in the motif the enzyme cuts. The
-#' forward primers are ligated to the left
+#' \code{"T|TAA"}, respectively. The vertical bar indicates cut site in the motif. 
 #'
 #' @return A \code{\link{Fasta}} object with all fragment sequences (5'-3').
 #'
 #' @author Lars Snipen.
 #'
-#' @seealso \code{\link{RMSdbase}}.
+#' @seealso \code{\link{RMSobject}}.
 #'
 #' @importFrom microseq readFasta gff2fasta
-#' @importFrom stringr str_c str_remove_all
+#' @importFrom stringr str_c str_sub str_length str_remove str_remove_all
 #' @importFrom dplyr mutate filter
 #'
 #' @examples
@@ -39,15 +38,15 @@
 #' 
 #' # Read genome, find fragments
 #' gnm <- readFasta(genome.file)
-#' frg <- getRMSfragments(gnm, genome.ID = "my.ID")
+#' frg <- getRMSfragments(gnm, "genome_1")
 #'
 #' # Write to file with writeFasta(frg, out.file = <filename>)
 #' 
 #' @export getRMSfragments
 #'
-getRMSfragments <- function(genome, genome.ID = NULL, min.length = 30, max.length = 500,
+getRMSfragments <- function(genome, genome.id, min.length = 30, max.length = 500,
                             left = "G|AATTC", right = "T|TAA", verbose = TRUE){
-  if(verbose) cat("getRMSfragments: ")
+  if(verbose) cat("Genome", genome.id, ": ")
   lft <- str_remove_all(left, "\\|")
   rght <- str_remove_all(right, "\\|")
   gff <- getRMS(genome, lft, rght)
@@ -57,16 +56,14 @@ getRMSfragments <- function(genome, genome.ID = NULL, min.length = 30, max.lengt
       filter((Length >= min.length) & (Length <= max.length)) -> gff
     if(verbose) cat("found", nrow(gff), "RMS-fragments\n")
     if(nrow(gff) > 0){
-      fsa <- gff2fasta(gff, genome)
-      if(!is.null(genome.ID)){
-        fsa$Header <- str_c(str_c(genome.ID, str_c("RMS", 1:nrow(fsa)), sep = "_"), fsa$Header, sep = " ")
-      }
       ct.lft <- str_length(str_remove(left, "\\|.+"))
       ct.rght <- str_length(str_remove(right, "\\|.+"))
-      fsa %>% 
-        mutate(Sequence = str_sub(Sequence, ct.lft+1, -(ct.rght+1))) -> fsa
+      gff2fasta(gff, genome) %>% 
+        mutate(Sequence = str_sub(Sequence, ct.lft+1, -(ct.rght+1))) %>% 
+        mutate(Header = str_c(str_c(genome.id, str_c("RMS", 1:n()), sep = "_"), Header, sep = " ")) -> fsa
     } else {
       if(verbose) cat("found no RMS-fragments within min and max length!\n")
+      fsa <- data.frame(Header = NULL, Sequence = NULL, stringsAsFactors = F)
     }
   } else {
     if(verbose) cat("found no RMS-fragments!\n")
