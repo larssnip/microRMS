@@ -380,4 +380,4 @@ New data
 
 This forms a code template, and by replacing the genomes in `gnm/` by your genomes, and the sequencing data in `fastq/` by your own data, it should be possible to run an analysis.
 
-Beware that for large collections of genomes (thousands), computations will be much slower than in this tutorial. You may also need a computer with a lot of memory, even if the copy number matrix has been implemented as a sparse matrix here. This saves memory, but results in slower computations.
+Beware that for large collections of genomes (thousands), computations will be much slower than in this tutorial. You may also need a computer with a lot of memory, even if the copy number matrix has been implemented as a sparse matrix here.
