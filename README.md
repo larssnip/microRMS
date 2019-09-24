@@ -141,7 +141,7 @@ print(ggd)
 
 ![](README_files/figure-markdown_github/unnamed-chunk-5-1.png)
 
-All branches look deep and nice here, as expected. If branches get too shallow (Jaccard distance close to zero) in this tree, the genomes in that clade will be diffuclt/impossible to separate since they share too many clusters. The solution to this is to prune the genome collection, keeping only one representative of such a tight clade in the database, as a representative of the entire clade.
+All branches look deep and nice here, as expected. If branches get too shallow (Jaccard distance close to zero) in this tree, the genomes in that clade will be diffcult/impossible to separate since they share too many clusters. The solution to this is to prune the genome collection, keeping only one representative of such a tight clade in the database, as a representative of the entire clade.
 
 Processing reads
 ================
@@ -297,7 +297,7 @@ print(plt)
 
 ![](README_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
-Since we have limited fragments to lengths of 30 to 500 only, the bias is not severe. Still, we may try to normalize:
+Note the log-transformed y-axes. Since we have limited fragments to lengths of 30 to 500 only, the bias is not severe, but the shortest and longest fragments have slightly lower readcounts. Let us try to normalize:
 
 ``` r
 rms.obj.norm <- normLength(rms.obj)
@@ -317,7 +317,7 @@ plt %+% tbl %>% print
 
 ![](README_files/figure-markdown_github/unnamed-chunk-11-1.png)
 
-There is some effect on the most extreme lengths, as usual. Note the log-transformed y-axis here.
+There is some effect on the most extreme lengths, as usual. Note the log-transformed y-axes, giving the illusion of large distortions in the lowest readcounts. They actually change little compared to the more normal readcount values.
 
 If we decide to stick to the normalized data, we do not need both `rms.obj` and `rms.obj.norm`:
 
@@ -331,8 +331,8 @@ Estimating abundances
 
 Finally, we estimate the abundances of the various genomes in our samples.
 
-The Constrained Least Square estimation
----------------------------------------
+The Constrained Ordinary Least Square (COLS)
+--------------------------------------------
 
 Abundance estimation is done by the `rmscols()` function. The supplied `rms.obj` must contain the cluster copy number matrix `rms.obj$Cpn.mat` and the readcounts `rms.obj$Readcount.mat`. The idea is to look for a linear combination of genome abundances that, given cluster copy numbers, best explains the observed readcounts in a sample. The output has been hidden from the following code:
 
@@ -381,5 +381,3 @@ New data
 This forms a code template, and by replacing the genomes in `gnm/` by your genomes, and the sequencing data in `fastq/` by your own data, it should be possible to run an analysis.
 
 Beware that for large collections of genomes (thousands), computations will be much slower than in this tutorial. You may also need a computer with a lot of memory, even if the copy number matrix has been implemented as a sparse matrix here. This saves memory, but results in slower computations.
-
-We hope to improve on all aspects of this methods in the near future.
