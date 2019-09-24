@@ -18,7 +18,7 @@ Tutorial - microbial community composition
 
 This is a short step-by-step tutorial on a small toy example to illustrate a typical RMS study where we want to estimate the abundance of various taxa in a microbial community.
 
-Download the archive [RMStutorial.zip](), and unzip it to some folder. Start R/RStudio and make the `RMStutorial` your working directory for this R session. Create a new R-script, copy the code chunks below into it, and save it in the RMStutorial folder. Step through this, and inspect the results.
+Download the archive [RMStutorial.zip](https://github.com/larssnip/microRMS/blob/master/RMStutorial.zip), and unzip it to some folder. Start R/RStudio and make the `RMStutorial` your working directory for this R session. Create a new R-script, copy the code chunks below into it, and save it in the RMStutorial folder. Step through this, and inspect the results.
 
 Note that after some code chunks there is some output, usually starting with `##`. You do not copy this into your R-script.
 
