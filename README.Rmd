@@ -25,7 +25,7 @@ This is a short step-by-step tutorial on a small toy example to illustrate a typ
 
 Download the archive [RMStutorial.zip](http://arken.nmbu.no/~larssn/soft/RMStutorial.zip), and unzip it to some folder. Start R/RStudio and make the `RMStutorial` your working directory for this R session. Create a new R-script, copy the code chunks below into it, and save it in the RMStutorial folder. Step through this, and inspect the results.
 
-Note that after some code chunks there is some output, usually starting with `##`. You do not copy this into your R-script.
+After some code chunks below there are some output lines, usually starting with `##`. Do not copy these into your R-script.
 
 Several of the function in this R package calls upon the software `vsearch`, see https://github.com/torognes/vsearch.
 
@@ -59,7 +59,7 @@ for(i in 1:nrow(genome.tbl)){
     writeFasta(out.file = file.path(frg.dir, genome.tbl$genome_file[i]))
 }
 ```
-We observe that all these genome shave plenty of RMS fragments, given the default restriction enzymes used here (see `?getRMSfragments`).
+We notice all these genomes have hundreds or even thousands of RMS fragments. All these will be amplified and sequenced in the RMS method.
 
 This job is done once for each genome, and the fragment files are stored. Thus, if you later want to add more genomes, you only run this for the new genomes. Notice that the fragment files have names identical to the genome files, and must be in a separate folder. Thus, the `genome_file` column in `genome.tbl` is used to name both genome and fragment files.
 
@@ -71,7 +71,7 @@ The creation of the RMS object requires the use of the `vsearch` software for cl
 ```{r}
 rms.obj <- RMSobject(genome.tbl, frg.dir)
 ```
-We notice the fragments clustered into more than 17000 clusters, using the default `identity`, see `?RMSobject` for details.
+The clustering of the fragments results in more than 17000 clusters, using the default `identity`, see `?RMSobject`.
 
 The resulting object `rms.obj` is a `list` with two tables and a matrix. The `Genome.tbl` is a copy of the `genome.tbl`, but has got two new columns, and should be inspected right away. The column `N_clusters` lists the number of fragment clusters in each genome, and `N_unique` how many of these are unique to each genome:
 ```{r}
