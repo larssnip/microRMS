@@ -11,23 +11,37 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Installation
-Start R and run
+To install directly from GitHub you first need to install the packages `devtools`. Start R and:
 ```{r, eval=FALSE}
-devtools::github_install("larssnip/microRMS")
+install.packages("devtools")
+```
+or if you use RStudio, use the meny Tools - Install Packages... You may also need the package `githubinstall`. If so, install it the same way as above.
+
+Next, you should be able to install this package by
+```{r, eval=FALSE}
+devtools::install_github("larssnip/microRMS")
 ```
 
-Several of the R functions calls upon the software VSEARCH that must be installed and available on the system, see [VSEARCH on GitHub](https://github.com/torognes/vsearch).
+Several of the R functions calls upon the software `vsearch` that must be installed and available on the system, see [VSEARCH on GitHub](https://github.com/torognes/vsearch). To test if `vsearch` is available from R, type 
+```{r, eval=FALSE}
+system("vsearch -h")
+```
+in the Console, and return. A long Help-text should be displayed. If not, you need to install `vsearch` and edit your PATH environment variable to make it available.
 
 
 
 # Tutorial - microbial community composition
-This is a short step-by-step tutorial on a small toy example to illustrate a typical RMS study where we want to estimate the abundance of various taxa in a microbial community.
+This is a short step-by-step tutorial on a small toy example to illustrate a typical RMS study where we want to estimate the abundance of various taxa in a microbial community. You need to install the `tidyverse` and `ggdendro` R packages as these are used in the code below. 
 
-Download the archive [RMStutorial.zip](http://arken.nmbu.no/~larssn/soft/RMStutorial.zip), and unzip it to some folder. Start R/RStudio and make the `RMStutorial` your working directory for this R session. Create a new R-script, copy the code chunks below into it, and save it in the RMStutorial folder. Step through this, and inspect the results.
+Download the archive [RMStutorial.zip](http://arken.nmbu.no/~larssn/soft/RMStutorial.zip), and unzip it to some folder. Start R/RStudio and make the `RMStutorial` your working directory for this R session, e.g.
+```{r, eval=FALSE}
+setwd("C:/my_tutorials/RMStutorial")   # edit this
+```
+where you need to replace the path above with the correct one depending on where you unzipped the RMStutorial.zip archive.
+
+Create a new R-script, copy the code chunks below into it, and save it in the RMStutorial folder. Step through this, and inspect the results.
 
 After some code chunks below there are some output lines, usually starting with `##`. Do not copy these into your R-script.
-
-Several of the function in this R package calls upon the software `vsearch`, see https://github.com/torognes/vsearch.
 
 
 

@@ -5,24 +5,44 @@ Lars Snipen
 Installation
 ============
 
-Start R and run
+To install directly from GitHub you first need to install the packages `devtools`. Start R and:
 
 ``` r
-devtools::github_install("larssnip/microRMS")
+install.packages("devtools")
 ```
 
-Several of the R functions calls upon the software VSEARCH that must be installed and available on the system, see [VSEARCH on GitHub](https://github.com/torognes/vsearch).
+or if you use RStudio, use the meny Tools - Install Packages... You may also need the package `githubinstall`. If so, install it the same way as above.
+
+Next, you should be able to install this package by
+
+``` r
+devtools::install_github("larssnip/microRMS")
+```
+
+Several of the R functions calls upon the software `vsearch` that must be installed and available on the system, see [VSEARCH on GitHub](https://github.com/torognes/vsearch). To test if `vsearch` is available from R, type
+
+``` r
+system("vsearch -h")
+```
+
+in the Console, and return. A long Help-text should be displayed. If not, you need to install `vsearch` and edit your PATH environment variable to make it available.
 
 Tutorial - microbial community composition
 ==========================================
 
-This is a short step-by-step tutorial on a small toy example to illustrate a typical RMS study where we want to estimate the abundance of various taxa in a microbial community.
+This is a short step-by-step tutorial on a small toy example to illustrate a typical RMS study where we want to estimate the abundance of various taxa in a microbial community. You need to install the `tidyverse` and `ggdendro` R packages as these are used in the code below.
 
-Download the archive [RMStutorial.zip](http://arken.nmbu.no/~larssn/soft/RMStutorial.zip), and unzip it to some folder. Start R/RStudio and make the `RMStutorial` your working directory for this R session. Create a new R-script, copy the code chunks below into it, and save it in the RMStutorial folder. Step through this, and inspect the results.
+Download the archive [RMStutorial.zip](http://arken.nmbu.no/~larssn/soft/RMStutorial.zip), and unzip it to some folder. Start R/RStudio and make the `RMStutorial` your working directory for this R session, e.g.
+
+``` r
+setwd("C:/my_tutorials/RMStutorial")   # edit this
+```
+
+where you need to replace the path above with the correct one depending on where you unzipped the RMStutorial.zip archive.
+
+Create a new R-script, copy the code chunks below into it, and save it in the RMStutorial folder. Step through this, and inspect the results.
 
 After some code chunks below there are some output lines, usually starting with `##`. Do not copy these into your R-script.
-
-Several of the function in this R package calls upon the software `vsearch`, see <https://github.com/torognes/vsearch>.
 
 Creating the RMS object
 =======================
@@ -108,18 +128,18 @@ print(rms.obj$Genome.tbl)
 ```
 
     ## # A tibble: 10 x 6
-    ##    genome_id     genome_file   tax_id organism_name     N_clusters N_unique
-    ##    <chr>         <chr>          <dbl> <chr>                  <int>    <int>
-    ##  1 Bacteroides_~ GCA_00347154~    820 Bacteroides unif~       2250     1945
-    ##  2 Bacteroides_~ GCA_00347513~    821 Bacteroides vulg~       1943     1895
-    ##  3 Parabacteroi~ GCA_00346362~    823 Parabacteroides ~       2016     1720
-    ##  4 Bacteroides_~ GCA_00346646~ 357276 Bacteroides dore~       2346     2070
-    ##  5 Bacteroides_~ GCA_00346936~    818 Bacteroides thet~       1870     1847
-    ##  6 [Eubacterium~ GCA_00347477~  39491 [Eubacterium] re~       1600     1576
-    ##  7 Roseburia_in~ GCA_00347003~ 360807 Roseburia inulin~        778      754
-    ##  8 Bacteroides_~ GCA_00346444~ 371601 Bacteroides xyla~       2754     2480
-    ##  9 Bacteroides_~ GCA_00347064~  28116 Bacteroides ovat~       1504     1479
-    ## 10 Blautia_obeum GCA_00346464~  40520 Blautia obeum AF~       1269     1249
+    ##    genome_id       genome_file    tax_id organism_name       N_clusters N_unique
+    ##    <chr>           <chr>           <dbl> <chr>                    <int>    <int>
+    ##  1 Bacteroides_un~ GCA_003471545~    820 Bacteroides unifor~       2250     1945
+    ##  2 Bacteroides_vu~ GCA_003475135~    821 Bacteroides vulgat~       1943     1895
+    ##  3 Parabacteroide~ GCA_003463625~    823 Parabacteroides di~       2016     1720
+    ##  4 Bacteroides_do~ GCA_003466465~ 357276 Bacteroides dorei ~       2346     2070
+    ##  5 Bacteroides_th~ GCA_003469365~    818 Bacteroides thetai~       1870     1847
+    ##  6 [Eubacterium]_~ GCA_003474775~  39491 [Eubacterium] rect~       1600     1576
+    ##  7 Roseburia_inul~ GCA_003470035~ 360807 Roseburia inuliniv~        778      754
+    ##  8 Bacteroides_xy~ GCA_003464445~ 371601 Bacteroides xylani~       2754     2480
+    ##  9 Bacteroides_ov~ GCA_003470645~  28116 Bacteroides ovatus~       1504     1479
+    ## 10 Blautia_obeum   GCA_003464645~  40520 Blautia obeum AF14~       1269     1249
 
 In this case there are plenty of unique clusters for all genomes. If two or more genomes are very closely related, this number will shrink towards zero, making the recognition of each impossible.
 
@@ -139,7 +159,7 @@ ggd <- ggdendrogram(dendro_data(tree),
 print(ggd)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-5-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-8-1.png)
 
 All branches look deep and nice here, as expected. If branches get too shallow (Jaccard distance close to zero) in this tree, the genomes in that clade will be diffcult/impossible to separate since they share too many clusters. The solution to this is to prune the genome collection, keeping only one representative of such a tight clade in the database, as a representative of the entire clade.
 
@@ -295,7 +315,7 @@ print(plt)
 
     ## Warning: Transformation introduced infinite values in continuous y-axis
 
-![](README_files/figure-markdown_github/unnamed-chunk-9-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-12-1.png)
 
 Note the log-transformed y-axes. Since we have limited fragments to lengths of 30 to 500 only, the bias is not severe, but the shortest and longest fragments have slightly lower readcounts. Let us try to normalize:
 
@@ -315,7 +335,7 @@ plt %+% tbl %>% print
 
     ## Warning: Transformation introduced infinite values in continuous y-axis
 
-![](README_files/figure-markdown_github/unnamed-chunk-11-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-14-1.png)
 
 There is some effect on the most extreme lengths, as usual. Note the log-transformed y-axes, giving the illusion of large distortions in the lowest readcounts. They actually change little compared to the more normal readcount values.
 
@@ -353,7 +373,7 @@ p1 <- ggplot(long.tbl) +
 print(p1)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-14-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-17-1.png)
 
 Comparing to gold standard
 --------------------------
@@ -373,7 +393,7 @@ suppressMessages(read_delim("gold_standard.txt", delim = "\t")) %>%
   facet_wrap(~Sample)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-15-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-18-1.png)
 
 New data
 ========
