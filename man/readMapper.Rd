@@ -4,8 +4,14 @@
 \alias{readMapper}
 \title{Mapping reads}
 \usage{
-readMapper(rms.obj, fa.dir, identity = 0.99, threads = 1,
-  min.length = 30, verbose = TRUE)
+readMapper(
+  rms.obj,
+  fa.dir,
+  identity = 0.99,
+  threads = 1,
+  min.length = 30,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{rms.obj}{A \code{list} with the tables \code{Sample.tbl} and \code{Cluster.tbl}, see details below.}

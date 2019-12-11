@@ -4,8 +4,15 @@
 \alias{RMSobject}
 \title{Constructing an RMS object}
 \usage{
-RMSobject(genome.tbl, frg.dir, identity = 0.99, min.length = 30,
-  max.length = 500, verbose = TRUE, threads = 1)
+RMSobject(
+  genome.tbl,
+  frg.dir,
+  identity = 0.99,
+  min.length = 30,
+  max.length = 500,
+  verbose = TRUE,
+  threads = 1
+)
 }
 \arguments{
 \item{genome.tbl}{A table (data.frame or tibble) with genome information, see below.}

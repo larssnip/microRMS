@@ -4,8 +4,7 @@
 \alias{normLength}
 \title{Length-normalization}
 \usage{
-normLength(rms.obj, max.train = 1000, readcount.low = 1,
-  verbose = TRUE)
+normLength(rms.obj, max.train = 1000, readcount.low = 1, verbose = TRUE)
 }
 \arguments{
 \item{rms.obj}{A \code{list} with RMS data structures, see \code{\link{RMSobject}}.}

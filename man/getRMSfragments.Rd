@@ -4,8 +4,15 @@
 \alias{getRMSfragments}
 \title{Retrieving RMS fragments from genomes}
 \usage{
-getRMSfragments(genome, genome.id, min.length = 30, max.length = 500,
-  left = "G|AATTC", right = "T|TAA", verbose = TRUE)
+getRMSfragments(
+  genome,
+  genome.id,
+  min.length = 30,
+  max.length = 500,
+  left = "G|AATTC",
+  right = "T|TAA",
+  verbose = TRUE
+)
 }
 \arguments{
 \item{genome}{A \code{\link{Fasta}} object with genome data.}
