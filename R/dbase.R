@@ -91,12 +91,11 @@ RMSobject <- function(genome.tbl, frg.dir, identity = 0.99, min.length = 30, max
     mutate(Cluster = Cluster + 1) %>%
     mutate(Cluster = str_remove(str_c("CLST", format(Cluster, scientific = F)), " +")) %>%
     mutate(Genome.id = str_remove(Tag, "_RMS[0-9]+$")) -> uc.tbl
-
+  
   uc.tbl %>%
     group_by(Cluster) %>%
-    summarise(Members = str_c(Tag, collapse = ";"), N.genomes = length(unique(Genome.id))) %>%
-    slice(match(centroids$Cluster, Cluster)) %>%
-    mutate(Header = centroids$Header, Sequence = centroids$Sequence) %>%
+    summarise(Members = str_c(Tag, collapse = ";"), N.genomes = length(unique(Genome.id))) %>% 
+    right_join(centroids, by = "Cluster") %>% 
     mutate(Length = str_length(Sequence)) %>%
     mutate(GC = baseCount(Sequence, c("C", "G")) / Length) %>%
     select(Cluster, Length, GC, N.genomes, Members, Header, Sequence) -> cluster.tbl

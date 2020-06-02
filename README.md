@@ -30,7 +30,7 @@ in the Console, and return. A long Help-text should be displayed. If not, you ne
 Tutorial - microbial community composition
 ==========================================
 
-This is a short step-by-step tutorial on a small toy example to illustrate a typical RMS study where we want to estimate the abundance of various taxa in a microbial community. You need to install the `tidyverse` and `ggdendro` R packages as these are used in the code below.
+This is a short step-by-step tutorial on a small toy example to illustrate a typical RMS study where we want to estimate the abundance of various taxa in a microbial community. You need to install the `tidyverse` and `ggdendro` R packages as these are used in the example code below.
 
 Download the archive [RMStutorial.zip](http://arken.nmbu.no/~larssn/soft/RMStutorial.zip), and unzip it to some folder. Start R/RStudio and make the `RMStutorial` your working directory for this R session, e.g.
 
@@ -117,6 +117,7 @@ rms.obj <- RMSobject(genome.tbl, frg.dir)
     genome 8 / 10 
     genome 9 / 10 
     genome 10 / 10 
+
     ## ...the genome table...done
 
 The clustering of the fragments results in more than 17000 clusters, using the default `identity`, see `?RMSobject`.
@@ -130,16 +131,16 @@ print(rms.obj$Genome.tbl)
     ## # A tibble: 10 x 6
     ##    genome_id       genome_file    tax_id organism_name       N_clusters N_unique
     ##    <chr>           <chr>           <dbl> <chr>                    <int>    <int>
-    ##  1 Bacteroides_un~ GCA_003471545~    820 Bacteroides unifor~       2250     1945
-    ##  2 Bacteroides_vu~ GCA_003475135~    821 Bacteroides vulgat~       1943     1895
-    ##  3 Parabacteroide~ GCA_003463625~    823 Parabacteroides di~       2016     1720
-    ##  4 Bacteroides_do~ GCA_003466465~ 357276 Bacteroides dorei ~       2346     2070
-    ##  5 Bacteroides_th~ GCA_003469365~    818 Bacteroides thetai~       1870     1847
-    ##  6 [Eubacterium]_~ GCA_003474775~  39491 [Eubacterium] rect~       1600     1576
-    ##  7 Roseburia_inul~ GCA_003470035~ 360807 Roseburia inuliniv~        778      754
-    ##  8 Bacteroides_xy~ GCA_003464445~ 371601 Bacteroides xylani~       2754     2480
-    ##  9 Bacteroides_ov~ GCA_003470645~  28116 Bacteroides ovatus~       1504     1479
-    ## 10 Blautia_obeum   GCA_003464645~  40520 Blautia obeum AF14~       1269     1249
+    ##  1 Bacteroides_un~ GCA_003471545~    820 Bacteroides unifor~       1504     1479
+    ##  2 Bacteroides_vu~ GCA_003475135~    821 Bacteroides vulgat~       2016     1720
+    ##  3 Parabacteroide~ GCA_003463625~    823 Parabacteroides di~       1600     1576
+    ##  4 Bacteroides_do~ GCA_003466465~ 357276 Bacteroides dorei ~       2250     1945
+    ##  5 Bacteroides_th~ GCA_003469365~    818 Bacteroides thetai~       1943     1895
+    ##  6 [Eubacterium]_~ GCA_003474775~  39491 [Eubacterium] rect~        778      754
+    ##  7 Roseburia_inul~ GCA_003470035~ 360807 Roseburia inuliniv~       1269     1249
+    ##  8 Bacteroides_xy~ GCA_003464445~ 371601 Bacteroides xylani~       2346     2070
+    ##  9 Bacteroides_ov~ GCA_003470645~  28116 Bacteroides ovatus~       2754     2480
+    ## 10 Blautia_obeum   GCA_003464645~  40520 Blautia obeum AF14~       1870     1847
 
 In this case there are plenty of unique clusters for all genomes. If two or more genomes are very closely related, this number will shrink towards zero, making the recognition of each impossible.
 
