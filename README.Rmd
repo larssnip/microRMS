@@ -31,7 +31,7 @@ in the Console, and return. A long Help-text should be displayed. If not, you ne
 
 
 # Tutorial - microbial community composition
-This is a short step-by-step tutorial on a small toy example to illustrate a typical RMS study where we want to estimate the abundance of various taxa in a microbial community. You need to install the `tidyverse` and `ggdendro` R packages as these are used in the code below. 
+This is a short step-by-step tutorial on a small toy example to illustrate a typical RMS study where we want to estimate the abundance of various taxa in a microbial community. You need to install the `tidyverse` and `ggdendro` R packages as these are used in the example code below. 
 
 Download the archive [RMStutorial.zip](http://arken.nmbu.no/~larssn/soft/RMStutorial.zip), and unzip it to some folder. Start R/RStudio and make the `RMStutorial` your working directory for this R session, e.g.
 ```{r, eval=FALSE}

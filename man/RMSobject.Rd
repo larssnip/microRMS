@@ -55,7 +55,7 @@ The \code{genome.tbl} has a row for each genome to include in the RMS database.
 There must be a column named \code{genome_file}, containing fasta filenames. These must be the
 names of the fasta files containing the RMS fragments from each genome. Use \code{\link{getRMSfragments}}
 to create these fasta files, ensuring the fasta headers follow the pattern
-<genome.ID>_RMSx, where <genome.ID> is some text unique to each genome.
+<genome.ID>_RMSx, where <genome.ID> is some text unique to each genome and x is some integer.
 The \code{genome.tbl} may contain other columns as well, but \code{genome_file} is required.
 }
 \examples{

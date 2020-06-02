@@ -15,7 +15,7 @@
 #' There must be a column named \code{genome_file}, containing fasta filenames. These must be the
 #' names of the fasta files containing the RMS fragments from each genome. Use \code{\link{getRMSfragments}}
 #' to create these fasta files, ensuring the fasta headers follow the pattern
-#' <genome.ID>_RMSx, where <genome.ID> is some text unique to each genome.
+#' <genome.ID>_RMSx, where <genome.ID> is some text unique to each genome and x is some integer.
 #' The \code{genome.tbl} may contain other columns as well, but \code{genome_file} is required.
 #'
 #' @return A list with the following objects: \code{Cluster.tbl}, \code{Cpn.mat}
@@ -51,12 +51,17 @@
 #' 
 #' @export RMSobject
 #'
-RMSobject <- function(genome.tbl, frg.dir, identity = 0.99, min.length = 30, max.length = 500,
-                     verbose = TRUE, threads = 1){
+RMSobject <- function(genome.tbl, frg.dir, identity = 0.99, min.length = 30, max.length = 500, verbose = TRUE, threads = 1){
+  if(length(grep("genome_id", colnames(genome.tbl))) == 0) stop("The genome.tbl must contain a column 'genome_id' with unique texts")
+  if(length(genome.tbl$genome_id) != length(unique(genome.tbl$genome_id))) stop("The genome_id's must be unique for each genome (row)")
   if(length(grep("genome_file", colnames(genome.tbl))) == 0) stop("The genome.tbl must contain a column 'genome_file' with filenames")
+  genome_files <- normalizePath(file.path(frg.dir, genome.tbl$genome_file))
+  ok <- file.exists(genome_files)
+  idx <- which(!ok)
+  if(length(idx) > 0) stop("genome_file", genome_files[idx], "does not exist")
   ok <- available.external("vsearch")
   all.frg <- tempfile(pattern = "all", fileext = ".frg")
-  ok <- file.append(all.frg, file.path(frg.dir, genome.tbl$genome_file))
+  ok <- file.append(all.frg, genome_files)
   if(min(ok) == 0) stop("Could not copy all fragment fasta files from", frg.dir)
 
   ### The VSEARCH clustering
@@ -96,16 +101,15 @@ RMSobject <- function(genome.tbl, frg.dir, identity = 0.99, min.length = 30, max
     mutate(GC = baseCount(Sequence, c("C", "G")) / Length) %>%
     select(Cluster, Length, GC, N.genomes, Members, Header, Sequence) -> cluster.tbl
   if(verbose) cat("done\n")
-
+  
   if(verbose) cat("...the copy number matrix\n")
-  ug <- unique(uc.tbl$Genome.id)
-  cpn <- Matrix(0, nrow = nrow(cluster.tbl), ncol= length(ug))
-  colnames(cpn) <- ug
+  cpn <- Matrix(0, nrow = nrow(cluster.tbl), ncol= nrow(genome.tbl))
+  colnames(cpn) <- genome.tbl$genome_id
   rownames(cpn) <- cluster.tbl$Cluster
-  for(j in 1:length(ug)){
-    if(verbose) cat("genome", j, "/", length(ug), "\r")
+  for(j in 1:nrow(genome.tbl)){
+    if(verbose) cat("genome", j, "/", nrow(genome.tbl), "\r")
     uc.tbl %>%
-      filter(Genome.id == ug[j]) %>%
+      filter(Genome.id == genome.tbl$genome_id[j]) %>%
       group_by(Cluster) %>%
       summarise(Count = n()) -> tbl
     cpn[match(tbl$Cluster, cluster.tbl$Cluster),j] <- tbl$Count
