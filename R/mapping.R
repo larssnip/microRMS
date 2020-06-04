@@ -30,7 +30,7 @@
 #' @importFrom readr read_delim
 #' @importFrom stringr word
 #'
-#' @examples See tutorial.
+#' @examples
 #'
 #' @export readMapper
 #'
@@ -93,7 +93,7 @@ readMapper <- function(rms.obj, fa.dir, identity = 0.99,
 #'
 #' @seealso \code{\link{RMSobject}}.
 #'
-#' @examples See tutorial.
+#' @examples
 #'
 #' @export addSampleTable
 #'

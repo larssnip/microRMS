@@ -47,7 +47,7 @@
 #' @importFrom dplyr mutate filter select group_by slice summarise
 #' @importFrom tibble tibble
 #'
-#' @examples See tutorial.
+#' @examples
 #' 
 #' @export RMSobject
 #'
@@ -55,17 +55,17 @@ RMSobject <- function(genome.tbl, frg.dir, identity = 0.99, min.length = 30, max
   if(length(grep("genome_id", colnames(genome.tbl))) == 0) stop("The genome.tbl must contain a column 'genome_id' with unique texts")
   if(length(genome.tbl$genome_id) != length(unique(genome.tbl$genome_id))) stop("The genome_id's must be unique for each genome (row)")
   if(length(grep("genome_file", colnames(genome.tbl))) == 0) stop("The genome.tbl must contain a column 'genome_file' with filenames")
-  genome_files <- normalizePath(file.path(frg.dir, genome.tbl$genome_file))
-  ok <- file.exists(genome_files)
+  frg_files <- normalizePath(file.path(frg.dir, genome.tbl$genome_file))
+  ok <- file.exists(frg_files)
   idx <- which(!ok)
-  if(length(idx) > 0) stop("genome_file", genome_files[idx], "does not exist")
+  if(length(idx) > 0) stop("The file(s)", frg_files[idx], "does not exist")
   ok <- available.external("vsearch")
-  all.frg <- tempfile(pattern = "all", fileext = ".frg")
-  ok <- file.append(all.frg, genome_files)
+  all.frg <- tempfile(pattern = "all_frg", fileext = ".fasta")
+  ok <- file.append(all.frg, frg_files)
   if(min(ok) == 0) stop("Could not copy all fragment fasta files from", frg.dir)
 
   ### The VSEARCH clustering
-  if(verbose) cat("VSEARCH clustering...\n")
+  if(verbose) cat("VSEARCH clustering of RMS fragments...\n")
   ctr.file <- tempfile(pattern = "centroide", fileext = ".fasta")
   uc.file <- tempfile(pattern = "uc", fileext = ".txt")
   cmd <- paste("vsearch",

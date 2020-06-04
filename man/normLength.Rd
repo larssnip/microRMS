@@ -27,7 +27,6 @@ RMS amplicon signals (readcounts) usually have some bias due to varying lengths.
 function attempts to remove this bias. It has been described in detail in Snipen et al, 2019.
 }
 \examples{
-See tutorial.
 
 }
 \author{

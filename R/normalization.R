@@ -20,7 +20,7 @@
 #' @importFrom stringr str_c
 #' @importFrom dplyr mutate filter
 #'
-#' @examples See tutorial.
+#' @examples
 #'
 #' @export normLength
 #'

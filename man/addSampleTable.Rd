@@ -27,7 +27,6 @@ The \code{sample.tbl} must contain at least the two columns \code{sample_id} and
 the name of the fasta file with processed reads, see \code{\link{readMapper}}.
 }
 \examples{
-See tutorial.
 
 }
 \seealso{

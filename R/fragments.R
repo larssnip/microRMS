@@ -3,7 +3,7 @@
 #'
 #' @description Retrieves a set of fragments from a genome, given restriction enzyme cutting motifs.
 #'
-#' @param genome A \code{\link{Fasta}} object with genome data.
+#' @param genome A table (fasta object) with genome data.
 #' @param genome.id Unique identifier for each genome, will be added to FASTA-headers (text).
 #' @param min.length Minimum fragment length (integer).
 #' @param max.length Maximum fragment length (integer).
@@ -11,17 +11,18 @@
 #' @param left Text with first, long, restriction enzyme cut motif (text).
 #' @param right Text with second, short, restriction enzyme cut motif (text).
 #'
-#' @details This function is used to find and retrieve all RMS fragments from a genome.
-#' A \code{\link{Fasta}}-object with the genome sequence(s) is required, as well as a \code{genome.id},
+#' @details This function is used to find and retrieve all RMS fragments from a \code{genome}.
+#' This is a \code{\link{tibble}} with sequence data in FASTA format, see \code{\link{readFasta}}.
+#' In addition, a \code{genome.id} is required,
 #' which is a text unique to each genome to be analyzed. This \code{genome.id} will be added to the
 #' fasta headers of the output, and all headers start with the token <genome.id>_RMSx, where x is
 #' an integer (1,2,...,). This first token is followed by a blank. This ensures that all first tokens
 #' are unique and that the genome of its origin is indicated for all fragments
 #'
 #' The default restriction enzymes are EcoRI and MseI, with cutting motifs \code{"G|AATTC"} and
-#' \code{"T|TAA"}, respectively. The vertical bar indicates cut site in the motif. 
+#' \code{"T|TAA"}, respectively. The vertical bar indicates the cut site in the motif. 
 #'
-#' @return A \code{\link{Fasta}} object with all fragment sequences (5'-3').
+#' @return A \code{\link{tibble}} with with all fragment sequences (5'-3') in FASTA format.
 #'
 #' @author Lars Snipen.
 #'
@@ -63,13 +64,12 @@ getRMSfragments <- function(genome, genome.id, min.length = 30, max.length = 500
         mutate(Header = str_c(str_c(genome.id, str_c("RMS", 1:n()), sep = "_"), Header, sep = " ")) -> fsa
     } else {
       if(verbose) cat("found no RMS-fragments within min and max length!\n")
-      fsa <- data.frame(Header = NULL, Sequence = NULL, stringsAsFactors = F)
+      fsa <- tibble(Header = NULL, Sequence = NULL)
     }
   } else {
     if(verbose) cat("found no RMS-fragments!\n")
-    fsa <- data.frame(Header = NULL, Sequence = NULL, stringsAsFactors = F)
+    fsa <- tibble(Header = NULL, Sequence = NULL)
   }
-  class(fsa) <- c("Fasta", "data.frame")
   return(fsa)
 }
 
@@ -77,17 +77,15 @@ getRMSfragments <- function(genome, genome.id, min.length = 30, max.length = 500
 
 ### Local function
 getRMS <- function(genome, left, right){
-  require(stringr)
-  gff <- data.frame(Seqid      = NULL,
-                    Source     = NULL,
-                    Type       = NULL,
-                    Start      = NULL,
-                    End        = NULL,
-                    Score      = NULL,
-                    Strand     = NULL,
-                    Phase      = NULL,
-                    Attributes = NULL,
-                    stringsAsFactors = F)
+  gff <- tibble(Seqid      = NULL,
+                Source     = NULL,
+                Type       = NULL,
+                Start      = NULL,
+                End        = NULL,
+                Score      = NULL,
+                Strand     = NULL,
+                Phase      = NULL,
+                Attributes = NULL)
   ### looping over genome-sequences
   for(i in 1:nrow(genome)){
     left.m <- str_locate_all(genome$Sequence[i], pattern = left)[[1]]
@@ -103,16 +101,15 @@ getRMS <- function(genome, left, right){
       }))
       nf <- nrow(lft.rght)
       if(nf > 0){
-        gff <- rbind(gff, data.frame(Seqid      = rep(word(genome$Header[i], 1, 1), nf),
-                                     Source     = NA,
-                                     Type       = rep("RMS_fragment", nf),
-                                     Start      = lft.rght[,1],
-                                     End        = lft.rght[,2],
-                                     Score      = NA,
-                                     Strand     = rep("+", nf),
-                                     Phase      = NA,
-                                     Attributes = NA,
-                                     stringsAsFactors = F))
+        gff <- rbind(gff, tibble(Seqid      = rep(word(genome$Header[i], 1, 1), nf),
+                                 Source     = NA,
+                                 Type       = rep("RMS_fragment", nf),
+                                 Start      = lft.rght[,1],
+                                 End        = lft.rght[,2],
+                                 Score      = NA,
+                                 Strand     = rep("+", nf),
+                                 Phase      = NA,
+                                 Attributes = NA))
       }
       ### negative strand
       lft <- left.m[,2]
@@ -124,16 +121,15 @@ getRMS <- function(genome, left, right){
       }))
       nn <- nrow(lft.rght)
       if(nn > 0){
-        gff <- rbind(gff, data.frame(Seqid      = rep(word(genome$Header[i], 1, 1), nn),
-                                     Source     = NA,
-                                     Type       = rep("RMS_fragment", nf),
-                                     Start      = lft.rght[,1],
-                                     End        = lft.rght[,2],
-                                     Score      = NA,
-                                     Strand     = rep("-", nf),
-                                     Phase      = NA,
-                                     Attributes = NA,
-                                     stringsAsFactors = F))
+        gff <- rbind(gff, tibble(Seqid      = rep(word(genome$Header[i], 1, 1), nn),
+                                 Source     = NA,
+                                 Type       = rep("RMS_fragment", nf),
+                                 Start      = lft.rght[,1],
+                                 End        = lft.rght[,2],
+                                 Score      = NA,
+                                 Strand     = rep("-", nf),
+                                 Phase      = NA,
+                                 Attributes = NA))
       } # end if
     } # end if
   }  # end for

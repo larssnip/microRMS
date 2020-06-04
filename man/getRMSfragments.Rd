@@ -15,7 +15,7 @@ getRMSfragments(
 )
 }
 \arguments{
-\item{genome}{A \code{\link{Fasta}} object with genome data.}
+\item{genome}{A table (fasta object) with genome data.}
 
 \item{genome.id}{Unique identifier for each genome, will be added to FASTA-headers (text).}
 
@@ -30,7 +30,7 @@ getRMSfragments(
 \item{verbose}{Turn on/off output text during processing (logical).}
 }
 \value{
-A \code{\link{Fasta}} object with all fragment sequences (5'-3').
+A table (fasta object, see \code{\link{readFasta}} with all fragment sequences (5'-3').
 }
 \description{
 Retrieves a set of fragments from a genome, given restriction enzyme cutting motifs.

@@ -1,7 +1,8 @@
 Package: microrms
 Type: Package
 Title: Processing and analysis of RMS data
-Version: 1.0.2
+Version: 1.1
+Date: 2020-06-04
 Author: Lars Snipen
 Maintainer: Lars Snipen <lars.snipen@nmbu.no>
 Description: Reduced Metagenome Sequencencing (RMS) is a technique to

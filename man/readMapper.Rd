@@ -44,7 +44,6 @@ This results in a matrix of read-counts. The column names of this matrix are the
 the Headers of the \code{centroids.file} are used as row names.
 }
 \examples{
-See tutorial.
 
 }
 \seealso{

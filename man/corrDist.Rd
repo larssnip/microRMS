@@ -13,14 +13,13 @@ corrDist(X)
 An nxn distance matrix, when the input sparse matrix has n columns
 }
 \description{
-Computes the correlation distances between pairs of columns of a sparse matrix
+Computes the correlation distances between pairs of columns of a sparse matrix.
 }
 \details{
 The correlation distance between two columns of a matrix is simply 1 minus the
 correlation between them.
 }
 \examples{
-more here.
 
 }
 \seealso{

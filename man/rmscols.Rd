@@ -36,7 +36,6 @@ In addition, a matrix of readcounts from one or more samples is required to be f
 \code{rms.obj$Readcount.mat}, see \code{\link{readMapper}} and tutorial for more details on this.
 }
 \examples{
-See tutorial.
 
 }
 \seealso{

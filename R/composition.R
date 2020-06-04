@@ -30,7 +30,7 @@
 #' @importFrom Matrix crossprod Diagonal
 #' @importFrom stats optim
 #'
-#' @examples See tutorial.
+#' @examples
 #'
 #' @export rmscols
 #'
@@ -69,7 +69,6 @@ rmscols <- function(rms.obj, trim = 0, reltol = 1e-6, verbose = TRUE){
 
 ### Local functions
 constrLS <- function(y, X, w, reltol = 1e-6, verbose = FALSE){
-  require(Matrix)
   p <- ncol(X)
 
   # Initial estimate
@@ -91,7 +90,6 @@ constrLS <- function(y, X, w, reltol = 1e-6, verbose = FALSE){
   return(lst$par)
 }
 objectFun <- function(b, y, X, w){
-  require(Matrix)
   r <- w * (y - (X %*% b))
   return(sum(r^2))
 }

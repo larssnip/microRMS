@@ -59,7 +59,6 @@ to create these fasta files, ensuring the fasta headers follow the pattern
 The \code{genome.tbl} may contain other columns as well, but \code{genome_file} is required.
 }
 \examples{
-See tutorial.
 
 }
 \seealso{
