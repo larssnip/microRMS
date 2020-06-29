@@ -60,9 +60,16 @@ RMSobject <- function(genome.tbl, frg.dir, identity = 0.99, min.length = 30, max
   idx <- which(!ok)
   if(length(idx) > 0) stop("The file(s)", frg_files[idx], "does not exist")
   ok <- available.external("vsearch")
-  all.frg <- tempfile(pattern = "all_frg", fileext = ".fasta")
-  ok <- file.append(all.frg, frg_files)
+  is.gz <- unique(str_detect(genome.tbl$genome_file, "\\.gz$"))
+  if(length(is.gz) != 1) stop("Either all or none of the fragment files must be compressed")
+  ext <- ifelse(is.gz, ".fasta.gz", ".fasta")
+  all.frg <- tempfile(pattern = "all_frg", fileext = ext)
+  ok <- file.append(file1 = all.frg, file2 = frg_files)
   if(min(ok) == 0) stop("Could not copy all fragment fasta files from", frg.dir)
+  if(is.gz){
+    R.utils::gunzip(all.frg)
+    all.frg <- str_remove(all.frg, "\\.gz$")
+  }
 
   ### The VSEARCH clustering
   if(verbose) cat("VSEARCH clustering of RMS fragments...\n")

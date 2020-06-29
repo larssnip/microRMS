@@ -29,8 +29,8 @@ normLength <- function(rms.obj, max.train = 1000, readcount.low = 1, verbose = T
   for(k in 1:ncol(rms.obj$Readcount.mat)){
     if(verbose) cat("Normalizing", colnames(rms.obj$Readcount.mat)[k], "\r")
     idx <- which(rms.obj$Readcount.mat[,k] >= readcount.low)
-    idx <- idx[sample(idx, size = min(max.train, length(idx)))]
-    mod <- loess(log2(rms.obj$Readcount.mat[idx,k]) ~ frg.length[idx],
+    idx2 <- sort(sample(idx, size = min(max.train, length(idx))))
+    mod <- loess(log2(rms.obj$Readcount.mat[idx2,k]) ~ frg.length[idx2],
                  control = loess.control(surface = "direct"))
     v.hat <- predict(mod, newdata = frg.length)
     ff <- 2^(max(v.hat) - v.hat)

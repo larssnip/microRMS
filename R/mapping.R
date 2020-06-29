@@ -34,12 +34,14 @@
 #'
 #' @export readMapper
 #'
-readMapper <- function(rms.obj, fa.dir, identity = 0.99,
-                       threads = 1, min.length = 30, verbose = TRUE){
-  if(!exists("Sample.tbl", rms.obj)) stop("The rms.obj must contain a Sample.tbl")
+readMapper <- function(rms.obj, fa.dir, identity = 0.99, threads = 1, min.length = 30, verbose = TRUE){
+  if(!exists("Sample.tbl", where = rms.obj)) stop("The rms.obj must contain a Sample.tbl")
   if(length(grep("sample_id", colnames(rms.obj$Sample.tbl))) == 0) stop("The rms.obj$Sample.tbl must contain a column sample_id")
-  if(length(grep("reads_file", colnames(rms.obj$Sample.tbl))) == 0) stop("The rms.obj$Sample.tbl must contain a column reads_file")
-  if(!exists("Cluster.tbl", rms.obj)) stop("The rms.obj must contain a Cluster.tbl")
+  if(length(grep("fasta_file", colnames(rms.obj$Sample.tbl))) == 0) stop("The rms.obj$Sample.tbl must contain a column fasta_file")
+  fa.files <- list.files(fa.dir)
+  idx <- which(!(rms.obj$Sample.tbl$fasta_file %in% fa.files))
+  if(length(idx) > 0) stop("Missing fasta files:", str_c(rms.obj$Sample.tbl$fasta_file[idx], sep = ","))
+  if(!exists("Cluster.tbl", where = rms.obj)) stop("The rms.obj must contain a Cluster.tbl")
   if(length(grep("Header", colnames(rms.obj$Cluster.tbl))) == 0) stop("The rms.obj$Cluster.tbl must contain a column Header")
   if(length(grep("Sequence", colnames(rms.obj$Cluster.tbl))) == 0) stop("The rms.obj$Cluster.tbl must contain a column Sequence")
   ok <- available.external("vsearch")
@@ -50,11 +52,12 @@ readMapper <- function(rms.obj, fa.dir, identity = 0.99,
   centroids.file <- tempfile(pattern = "centroid", fileext = ".fasta")
   writeFasta(rms.obj$Cluster.tbl, out.file = centroids.file)
   tab.file <- tempfile(pattern = "rmstab", fileext = ".txt")
+  tot <- numeric(nrow(rms.obj$Sample.tbl))
   for(i in 1:nrow(rms.obj$Sample.tbl)){
     if(verbose) cat("Mapping reads from sample", rms.obj$Sample.tbl$sample_id[i], "...\n")
     cmd <- paste("vsearch",
                  "--threads", threads,
-                 "--usearch_global", file.path(fa.dir, rms.obj$Sample.tbl$reads_file[i]),
+                 "--usearch_global", file.path(fa.dir, rms.obj$Sample.tbl$fasta_file[i]),
                  "--db", centroids.file,
                  "--id", identity,
                  "--iddef", "2",
@@ -65,8 +68,14 @@ readMapper <- function(rms.obj, fa.dir, identity = 0.99,
     rms.tbl <- suppressMessages(read_delim(tab.file, delim = "\t"))
     idx <- match(rms.tbl[[1]], tags)
     RMS.counts[idx,i] <- rms.tbl[[2]]
+    readFasta(file.path(fa.dir, rms.obj$Sample.tbl$fasta_file[i])) %>% 
+      mutate(size = as.numeric(str_remove(str_extract(Header, pattern = "size=[0-9]+"), "size="))) %>% 
+      summarize(size_sum = sum(size)) -> stb
+    tot[i] <- stb$size_sum
   }
   ok <- file.remove(tab.file, centroids.file)
+  rms.obj$Sample.tbl %>% 
+    mutate(reads_total = tot, reads_mapped = colSums(RMS.counts)) -> rms.obj$Sample.tbl
   return(c(rms.obj, list(Readcount.mat = RMS.counts)))
 }
 
@@ -83,6 +92,8 @@ readMapper <- function(rms.obj, fa.dir, identity = 0.99,
 #' already existing \code{rms.obj}. The latter is a \code{list}, and this function only
 #' ensures the added element is correctly named \code{Sample.tbl}.
 #' 
+#' If the supplied \code{rms.obj} already contains a \code{Sample.tbl}, it is simply replaced by the new \code{sample.tbl}.
+#' 
 #' The \code{sample.tbl} must contain at least the two columns \code{sample_id} and 
 #' \code{reads_file}. The first is a unique text to identify each sample, the latter is
 #' the name of the fasta file with processed reads, see \code{\link{readMapper}}.
@@ -98,5 +109,10 @@ readMapper <- function(rms.obj, fa.dir, identity = 0.99,
 #' @export addSampleTable
 #'
 addSampleTable <- function(rms.obj, sample.tbl){
-  return(c(rms.obj, list(Sample.tbl = sample.tbl)))
+  if(exists("Sample.tbl", where = rms.obj)){
+    rms.obj$Sample.tbl <- sample.tbl
+  } else {
+    rms.obj <- c(rms.obj, list(Sample.tbl = sample.tbl))
+  }
+  return(rms.obj)
 }

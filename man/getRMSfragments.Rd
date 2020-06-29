@@ -30,21 +30,22 @@ getRMSfragments(
 \item{verbose}{Turn on/off output text during processing (logical).}
 }
 \value{
-A table (fasta object, see \code{\link{readFasta}} with all fragment sequences (5'-3').
+A \code{\link{tibble}} with with all fragment sequences (5'-3') in FASTA format.
 }
 \description{
 Retrieves a set of fragments from a genome, given restriction enzyme cutting motifs.
 }
 \details{
-This function is used to find and retrieve all RMS fragments from a genome.
-A \code{\link{Fasta}}-object with the genome sequence(s) is required, as well as a \code{genome.id},
+This function is used to find and retrieve all RMS fragments from a \code{genome}.
+This is a \code{\link{tibble}} with sequence data in FASTA format, see \code{\link{readFasta}}.
+In addition, a \code{genome.id} is required,
 which is a text unique to each genome to be analyzed. This \code{genome.id} will be added to the
 fasta headers of the output, and all headers start with the token <genome.id>_RMSx, where x is
 an integer (1,2,...,). This first token is followed by a blank. This ensures that all first tokens
 are unique and that the genome of its origin is indicated for all fragments
 
 The default restriction enzymes are EcoRI and MseI, with cutting motifs \code{"G|AATTC"} and
-\code{"T|TAA"}, respectively. The vertical bar indicates cut site in the motif.
+\code{"T|TAA"}, respectively. The vertical bar indicates the cut site in the motif.
 }
 \examples{
 # A small genome in this package
