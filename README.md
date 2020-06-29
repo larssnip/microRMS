@@ -52,12 +52,12 @@ This is a short step-by-step tutorial on a small toy example to illustrate a typ
 
 You need to install the `tidyverse` and `ggdendro` R packages as these are used in the example code below, in addition to the `microrms` package and its dependencies.
 
-Download the archive [RMStutorial.tar.gz](http://arken.nmbu.no/~larssn/soft/RMStutorial.tar.gz), and unzip it to some folder named `RMStutorial`. It should contain the folders `gnm`, `fastq`, `fasta`, `frg` and `tmp`, where the latter three are empty. There should also a file `gold_standard.txt`. The last folder, `ecoli_frg`, is used in the second tutorial below.
+Download the archive [RMS\_tutorial.tar.gz](http://arken.nmbu.no/~larssn/soft/RMS_tutorial.tar.gz), and unzip it to some folder named `RMS_tutorial`. It should contain the folders `gnm`, `fastq`, `fasta`, `frg` and `tmp`, where the latter three are empty. There should also a file `gold_standard.txt`. The last folder, `ecoli_frg`, is used in the second tutorial below.
 
-Start R/RStudio and make the `RMStutorial` your working directory for this R session, e.g.
+Start R/RStudio and make the `RMS_tutorial` your working directory for this R session, e.g.
 
 ``` r
-setwd("C:/my_tutorials/RMStutorial")   # edit this
+setwd("C:/my_tutorials/RMS_tutorial")   # edit this
 ```
 
 where you need to replace the path above with the correct one depending on where you unzipped the archive.
@@ -75,7 +75,7 @@ All information is stored in an *rms object*, which is simply a `list` with seve
 
 ### Collecting RMS fragments
 
-First, we collect the RMS fragments from each genome, and store these as fasta-formatted files in a separate folder. You also find the file `gnm/genome_table.txt` among the genomes, containing a small table with one row for each genome. It is required you have such a metadata table with information about the genomes. This table *must contain* the columns `genome_id` and `genome_file`, but may contain any other genome metadata columns in addition to these.
+First, we collect the RMS fragments from each genome, and store these as fasta-formatted files in a separate folder. This is something you do once for each genome. You also find the file `gnm/genome_table.txt` among the genomes, containing a small table with one row for each genome. It is required you have such a metadata table with information about the genomes. This table *must contain* the columns `genome_id` and `genome_file`, but may contain any other genome metadata columns in addition to these.
 
 The `genome_id` should be a text without spaces, and unique to each genome. It is added to the header-lines of the fragment fasta files, to indicate the genome of origin for all fragments. Here we used the prefix of the genome fasta filenames as `genome_id`.
 
@@ -111,7 +111,7 @@ We notice all these genomes have hundreds or even thousands of RMS fragments. If
 
 This job is done once for each genome, and the fragment files are stored (genome files are no longer needed). Thus, if you later want to add more genomes, you only run this for the new genomes. Notice that the fragment files have names identical to the genome files, and must be in a separate folder. Thus, the `genome_file` column in `genome.tbl` is used to name both genome and fragment files.
 
-Also, note the `readfasta()/writeFasta()` functions from the `microseq` package handles files compressed to `.gz` as well as uncompressed fasta files.
+Also, note the `readfasta()/writeFasta()` functions from the `microseq` package handles gzipped files. Since the `genome_file` names have the extension `.gz` the fragment files will also be compressed.
 
 ### The RMS object
 
@@ -142,7 +142,7 @@ rms.obj <- RMSobject(genome.tbl, frg.dir)
 
 The clustering of these fragments results in more than 17000 clusters, using the default `identity`, see `?RMSobject`. The resulting object `rms.obj` is a `list` with two tables and a matrix.
 
-The `Genome.tbl` is a copy of the `genome.tbl`, but has got two new columns, and should be inspected right away. The column `N_clusters` lists the number of fragment clusters in each genome, and `N_unique` how many of these are unique to each genome:
+The `rms.obj$Genome.tbl` is a copy of the `genome.tbl`, but has got two new columns, and should be inspected right away. The column `N_clusters` lists the number of fragment clusters in each genome, and `N_unique` how many of these are unique to each genome:
 
 ``` r
 print(rms.obj$Genome.tbl)
@@ -164,7 +164,7 @@ print(rms.obj$Genome.tbl)
 
 In this case there are plenty of unique clusters for all genomes. If two or more genomes are very closely related, this number will shrink towards zero, making the recognition of each impossible.
 
-The `Cluster.tbl` is a table listing information about all fragment clusters, one row for each cluster. Here is a listing of the first entries:
+The `rms.obj$Cluster.tbl` is a table listing information about all fragment clusters, one row for each cluster. Here is a listing of the first entries:
 
 ``` r
 head(rms.obj$Cluster.tbl)
@@ -182,7 +182,7 @@ head(rms.obj$Cluster.tbl)
 
 Very similar fragments (identity above the threshold set by the `identity` argument to `RMSobject`) will belong to the same cluster. Closely related genome will typically share several fragments. The `Cluster.tbl` indicate how many genomes contain each fragment (`N.genomes`), and also which genomes (`Members`). Note this table has a `Header` and a `Sequence` column, making it possible to write this to a fasta file using `writeFasta()`.
 
-The `Cpn.mat` is the copy number matrix. This is a central data structure of the RMS method. It has one row for each fragment cluster, and one column for each genome. Here are the first few rows and columns:
+The `rms.obj$Cpn.mat` is the copy number matrix. This is a central data structure of the RMS method. It has one row for each fragment cluster, and one column for each genome. Here are the first few rows and columns:
 
 ``` r
 print(rms.obj$Cpn.mat[1:10,1:4])
@@ -215,8 +215,8 @@ One way of quantifying the pairwise difference between the genomes is to compute
 
 ``` r
 library(ggdendro)
-d <- corrDist(rms.obj$Cpn.mat)
-tree <- hclust(as.dist(d), method = "single")
+D <- corrDist(rms.obj$Cpn.mat)
+tree <- hclust(as.dist(D), method = "single")
 ggd <- ggdendrogram(dendro_data(tree),
                     rotate = T,
                     theme_dendro = F) +
@@ -224,18 +224,18 @@ ggd <- ggdendrogram(dendro_data(tree),
 print(ggd)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-10-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-11-1.png)
 
 All branches look deep and nice here, with correlation distances above 0.9. If branches get too shallow (correlation distance close to zero) in this tree, the genomes in that clade will be diffcult/impossible to separate since they share too many fragments. The solution to this is to cluster the genomes, which is illustrated in the next tutorial below.
 
 Processing reads
 ----------------
 
-The read processing means essentially taking the fastq files from sequencing as input and producing a fasta file as output, for each sample. This step is independent of what we did above.
+The read processing means essentially taking the fastq files from sequencing as input and producing a fasta file as output, for each sample. This step is independent of what we did above. You only do this once for each sample, and it is the resulting fasta files we use in the downstream analysis.
 
-The data from sequencing are the paired fastq files in the folder `fastq/`. Again, it is required to have a table like the one in `fastq/sample_table.txt` with metadata about each sample. There should always be a column `sample_id` with a unique text for each sample. Also, this `sample.tbl` should have two columns `R1_file` and `R2_file` specifying the corresponding fastq filenames.
+The data from sequencing are the paired fastq files in the folder `fastq/`. Again, it is reccomended to have a table like the one in `fastq/sample_table.txt` with metadata about each sample. There should always be a column `sample_id` with a unique text for each sample. Also, this `sample.tbl` has two columns `R1_file` and `R2_file` specifying the corresponding fastq filenames.
 
-In addition we also create the required column `fasta_file` below, containing the name of the resulting fasta files with reads for each sample. Below we create this from the `sample_id`, which means this text must be useful as a filename prefix (e.g. no `/` or spaces inside). The table may contain this column already, with no need to create it. Again, paths *should not* be part of any filenames, we supply them as separate inputs. Below we output these files to the `fasta` folder.
+In addition we also create the required column `fasta_file` below, containing the name of the resulting fasta files with reads for each sample. Here we create this from the `sample_id`, which means this text must be useful as a filename prefix (e.g. no `/` or spaces inside). The table may contain this column already, with no need to create it. Again, paths *should not* be part of any filenames, we supply them as separate inputs. Below we output these files to the `fasta` folder.
 
 There is no R function for doing the read processing, since this may be done in many different ways. Here is an R script with some suggested code for doing this processing using the `vsearch` software. Note the explicit decompression of the fastq-files. This is only added here in case you run this on a Windows 10 computer, on which we have found `vsearch` is not capable of reading gzipped files. On all other system these code-chunks should be deleted, and `vsearch` will read compressed files directly. The (long) screen output from this is hidden in this document:
 
@@ -359,7 +359,7 @@ Before we are done with this step, we add the `sample.tbl` to our `rms.obj`. Not
 rms.obj <- addSampleTable(rms.obj, sample.tbl)
 ```
 
-In this way we have the information about our samples in the same object as we have all other information. Inspect the `rms.obj` to verify the `Sample.tbl` is now another element in this `list`. Note that the function used above will replace an existing `Sample.tbl` inside the `rms.obj` if the latter already contains such a table.
+In this way we have the information about our samples in the same object as we have all other information. Inspect the `rms.obj` to verify the `Sample.tbl` is now another element in this `list`. Note that the function used above will replace an existing `Sample.tbl` inside the `rms.obj` if the latter already contains such a table. This means you may re-use the genome collection (and the corresponding `Genome.tbl`, `Cluster.tbl`and `Cpn.mat`) with other samples (reads) by adding a different `Sample.tbl`.
 
 Mapping reads to clusters
 -------------------------
@@ -429,7 +429,7 @@ print(plt)
 
     ## Warning: Transformation introduced infinite values in continuous y-axis
 
-![](README_files/figure-markdown_github/unnamed-chunk-16-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-17-1.png)
 
 Note the log-transformed y-axes. Since we have limited fragments to lengths of 30 to 500 only, the bias is not severe, but the shortest and longest fragments have slightly lower readcounts. Let us try to normalize:
 
@@ -449,7 +449,7 @@ plt %+% tbl %>% print
 
     ## Warning: Transformation introduced infinite values in continuous y-axis
 
-![](README_files/figure-markdown_github/unnamed-chunk-18-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-19-1.png)
 
 There is some effect on the most extreme lengths, as usual. Note the log-transformed y-axes, giving the illusion of large distortions in the smallest readcounts. They actually change little compared to the more normal readcount values.
 
@@ -476,27 +476,28 @@ abd.mat <- rmscols(rms.obj)
     ## Deconvolving sample Sample_1 ...
     ##    initial estimate...
     ##    constrained optimization...
-    ## final  value 3544340.203421 
+    ## final  value 3907551.479916 
     ## converged
     ## Deconvolving sample Sample_2 ...
     ##    initial estimate...
     ##    constrained optimization...
-    ## final  value 2458206.784959 
+    ## iter    1 value 3096080.587833
+    ## final  value 3096080.587833 
     ## converged
     ## Deconvolving sample Sample_3 ...
     ##    initial estimate...
     ##    constrained optimization...
-    ## iter    1 value 3947655.772168
-    ## final  value 3947655.772168 
+    ## iter    1 value 3918957.400454
+    ## final  value 3918957.400454 
     ## converged
     ## Deconvolving sample Sample_4 ...
     ##    initial estimate...
     ##    constrained optimization...
-    ## iter    1 value 5671248.803066
-    ## final  value 5671248.803066 
+    ## iter    1 value 5326493.929727
+    ## final  value 5326493.929727 
     ## converged
 
-The `abd.mat` is a matrix with one row for each genome, and one column for each sample. The numbers in a column are the relative contributions of each genome to this sample.
+The `abd.mat` is a matrix with one row for each genome, and one column for each sample. The numbers in a column are the relative abundances for each genome in the corresponding sample.
 
 We may plot the results as stacked bar charts:
 
@@ -504,12 +505,12 @@ We may plot the results as stacked bar charts:
 abd.mat %>% 
   as_tibble(rownames = "genome_id") %>% 
   pivot_longer(cols = -genome_id, names_to = "sample_id", values_to = "Estimated") -> long.tbl
-p1 <- ggplot(long.tbl) +
+
+ggplot(long.tbl) +
   geom_col(aes(x = sample_id, y = Estimated, fill = genome_id), color = "black")
-print(p1)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-21-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-22-1.png)
 
 ### Comparing to gold standard
 
@@ -529,7 +530,7 @@ suppressMessages(read_delim("gold_standard.txt", delim = "\t")) %>%
   facet_wrap(~sample_id)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-22-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-23-1.png)
 
 New data
 --------
@@ -541,7 +542,7 @@ Beware that for large collections of genomes (thousands), computations will be m
 Tutorial 2 - subspecies resolution
 ==================================
 
-As mentioned above, the RMS method has a potential for estimating abundances down to below the species rank, i.e.separating strains. This is in fact one of the strengths of RMS, compared to a full shotgun sequencing. The reason for this sensitivity is the fact that we know *a priori* which fragments belong to which genomes.
+As mentioned above, the RMS method has a potential for estimating abundances down to below the species rank, i.e.separating strains. This is in fact one of the strengths of RMS. The reason for this sensitivity is the fact that we know *a priori* which fragments belong to which genomes.
 
 If two genomes are very similar, they will also share many RMS fragments. As with all methods, there will always be a lower resolution, i.e. it is impossible to 'see' the difference between two identical genomes! How close can two genomes be, and still be separated by RMS?
 
@@ -649,7 +650,7 @@ ggd <- ggdendrogram(dendro_data(tree),
 print(ggd)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-25-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-26-1.png)
 
 It is clear that some distances are close to zero. We may also compute the condition value from the copy number matrix:
 
@@ -659,7 +660,7 @@ print(conditionValue(ecoli.rms.obj$Cpn.mat))
 
     ## [1] 9056.452
 
-How large condition value can we tolerate? The perfect value is 1, but this is never achieved with real data. a value below 10 is extremely good. The condition value for the copy number matrix in tutorial 1 is around 3.7, and we saw how all those genomes separated nicely in the dendrogram. Condition values below 100 or even 1000 is still quite acceptable, and even 10 000 is not all that bad. Going above this, we must expect some substantial errors in some abundance estimates. When later running `rmscols()` to estimate abundances, the number of iterations is a measure of how separable the genomes are. A larger condition value means more iterations are needed, and less precise estimates.
+How large condition value can we tolerate? The perfect value is 1, but this is never achieved with real data. a value below 10 is extremely good. The condition value for the copy number matrix in tutorial 1 is around 3.7, and we saw how all those genomes separated nicely in the dendrogram. Condition values below 100 or even 1000 is still quite acceptable, and even 10 000 is not all that bad. Going above this, we must expect some substantial errors in some abundance estimates. When later running `rmscols()` to estimate abundances, the number of iterations is also a measure indicating how separable the genomes are. A larger condition value means more iterations are needed, and less precise estimates.
 
 Let us 'prune' the genome collection such that we get a smaller set of genomes, that we are capable of separating better. This is done by *genome clustering*. Genomes who are too similar are clustered into a group, and only the centroide genome in this group is used in the analysis, as a representative for the group. We use the function `genomeClustering()` for this:
 
@@ -708,6 +709,6 @@ ggd <- ggdendrogram(dendro_data(tree),
 print(ggd)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-30-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-31-1.png)
 
-Note that no correlation distance are now below 0.20, and we expect to be able to separate these genomes fairly well. In [Snipen et al (2020)]() we demonstrate this on a much larger collection of *E. coli* genomes. Note also that this is something you do *in silico* prior to any experimental efforts, since it only involves the sequenced genomes. Having sequenced some samples, you proceed as in tutorial 1 in order to estimate how many of these clusters are actually found in the samples.
+Note that no correlation distance are now below 0.20, and we expect to be able to separate these genomes fairly well. In [Snipen et al (2020)]() we demonstrate this on a much larger collection of *E. coli* genomes. Note also that this is something you do *in silico* prior to any experimental efforts, since it only involves the sequenced genomes. Having sequenced some samples, you proceed as in tutorial 1 in order to estimate how abundant these clusters are in the samples.
