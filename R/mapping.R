@@ -1,7 +1,7 @@
 #' @name readMapper
 #' @title Mapping reads
 #'
-#' @description Mapping reads to clusters in an RMS object using VSEARCH
+#' @description Mapping reads to clusters in an RMS object using VSEARCH.
 #'
 #' @param rms.obj A \code{list} with the tables \code{Sample.tbl} and \code{Cluster.tbl}, see details below.
 #' @param fa.dir A path to where the fasta files with reads are located.
@@ -10,17 +10,23 @@
 #' @param min.length Minimum fragment length used by vsearch (integer).
 #' @param verbose Turn on/off output text during processing (logical).
 #' 
-#' @details The \code{sample.files} must be a vector of names of FASTA-files containing
-#' the reads from the samples. The \code{centroids.file} is the name of a FASTA-file with the
-#' database centroids to map against. Thus, the reads from each sample will be mapped to these
+#' @details The \code{rms.obj} must be a list with the required data structures for mapping
+#' reads, i.e. it must contain a \code{Sample.tbl}, see \code{\link{addSampleTable}}. Note
+#' that this table must have a column named \code{fasta_file} naming the fasta files with
+#' the reads to be mapped, one file for each sample. The argument \code{fa.dir} is used to
+#' specify the path to these files.
+#' 
+#' The \code{rms.obj} must also contain a \code{Cluster.tbl}, see \code{\link{RMSobject}}.
+#' The reads from each sample will be mapped to the cluster
 #' sequences, using the \code{identity} threshold.
 #' 
-#' This results in a matrix of read-counts. The column names of this matrix are the filenames in
-#' \code{sample.files}, after the removal of the path and the file extension. The first token in
-#' the Headers of the \code{centroids.file} are used as row names.
+#' This results in a matrix of read counts, with one row for each fragment cluster and one column
+#' for each sample. The column names of this matrix are the \code{sample_id}
+#' texts in the \code{Sample.tbl}. The first token in the \code{Header} of the \code{Cluster.tbl} 
+#' are used as row names.
 #'
-#' @return A matrix of read-counts, with one row for each fragment cluster and one column for each
-#' sample file.
+#' @return An RMS object with the matrix \code{Readcount.mat} added. Also, two new columns, 
+#' \code{reads_total} and \code{reads_mapped}, have been added to the \code{Sample.tbl}.
 #'
 #' @author Lars Snipen.
 #'
@@ -97,7 +103,7 @@ readMapper <- function(rms.obj, fa.dir, identity = 0.99, threads = 1, min.length
 #' If the supplied \code{rms.obj} already contains a \code{Sample.tbl}, it is simply replaced by the new \code{sample.tbl}.
 #' 
 #' The \code{sample.tbl} must contain at least the two columns \code{sample_id} and 
-#' \code{reads_file}. The first is a unique text to identify each sample, the latter is
+#' \code{fasta_file}. The first is a unique text to identify each sample, the latter is
 #' the name of the fasta file with processed reads, see \code{\link{readMapper}}.
 #' 
 #' @return A \code{list} similar to the input \code{rms.obj}, but with one new element added.

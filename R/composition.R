@@ -45,8 +45,8 @@ rmscols <- function(rms.obj, trim = 0, reltol = 1e-6, verbose = TRUE){
   colnames(beta.matrix) <- colnames(rms.obj$Readcount.mat)
   if(trim > 0) residuals <- matrix(0, nrow = C, ncol = J)
   for(j in 1:J){
-    tot.reads <- colSums(rms.obj$Readcount.mat[,j])
-    nc <- colSums(rms.obj$Readcount.mat[,j] > 0)
+    tot.reads <- sum(rms.obj$Readcount.mat[,j])
+    nc <- sum(rms.obj$Readcount.mat[,j] > 0)
     if(verbose) cat("De-convolving sample", rms.obj$Sample.tbl$sample_id[j],
                     "having", tot.reads, "reads mapped to", nc, "clusters...\n")
     if(tot.reads > 0){
