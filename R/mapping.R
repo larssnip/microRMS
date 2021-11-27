@@ -27,7 +27,6 @@
 #' @seealso \code{\link{RMSobject}}, \code{\link{rmscols}}.
 #'
 #' @importFrom microseq readFasta
-#' @importFrom readr read_delim
 #' @importFrom stringr word
 #'
 #' @examples
@@ -65,9 +64,12 @@ readMapper <- function(rms.obj, fa.dir, identity = 0.99, threads = 1, min.length
                  "--sizein --sizeout",
                  "--otutabout", tab.file)
     system(cmd)
-    rms.tbl <- suppressMessages(read_delim(tab.file, delim = "\t"))
-    idx <- match(rms.tbl[[1]], tags)
-    RMS.counts[idx,i] <- rms.tbl[[2]]
+    lines <- readLines(tab.file)
+    if(length(lines) > 1){
+      M <- str_split(lines[-1], pattern = "\t", simplify = T)
+      idx <- match(M[,1], tags)
+      RMS.counts[idx,i] <- as.numeric(M[,2])
+    }
     readFasta(file.path(fa.dir, rms.obj$Sample.tbl$fasta_file[i])) %>% 
       mutate(size = as.numeric(str_remove(str_extract(Header, pattern = "size=[0-9]+"), "size="))) %>% 
       summarize(size_sum = sum(size)) -> stb

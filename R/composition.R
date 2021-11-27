@@ -45,24 +45,29 @@ rmscols <- function(rms.obj, trim = 0, reltol = 1e-6, verbose = TRUE){
   colnames(beta.matrix) <- colnames(rms.obj$Readcount.mat)
   if(trim > 0) residuals <- matrix(0, nrow = C, ncol = J)
   for(j in 1:J){
-    if(verbose) cat("Deconvolving sample", rms.obj$Sample.tbl$sample_id[j], "...\n")
-    w <- rep(1,C)
-    s.hat <- constrLS(rms.obj$Readcount.mat[,j], rms.obj$Cpn.mat, w, reltol, verbose)
-    
-    if(trim > 0){
-      if(verbose) cat("Trimming residuals...\n")
-      residuals[,j] <- as.numeric(rms.obj$Readcount.mat[,j] - rms.obj$Cpn.mat %*% s.hat)
-      rsd <- sd(residuals[,j])
-      for(g in 1:G){
-        idx <- which(rms.obj$Cpn.mat[,g] > 0)
-        qq <- quantile(residuals[idx,j], c(trim/2, 1-trim/2))
-        idd <- which(residuals[idx,j] < qq[1] | residuals[idx,j] > qq[2])
-        w[idx[idd]] <- 0
-      }
+    tot.reads <- colSums(rms.obj$Readcount.mat[,j])
+    nc <- colSums(rms.obj$Readcount.mat[,j] > 0)
+    if(verbose) cat("De-convolving sample", rms.obj$Sample.tbl$sample_id[j],
+                    "having", tot.reads, "reads mapped to", nc, "clusters...\n")
+    if(tot.reads > 0){
+      w <- rep(1,C)
       s.hat <- constrLS(rms.obj$Readcount.mat[,j], rms.obj$Cpn.mat, w, reltol, verbose)
+      
+      if(trim > 0){
+        if(verbose) cat("Trimming residuals...\n")
+        residuals[,j] <- as.numeric(rms.obj$Readcount.mat[,j] - rms.obj$Cpn.mat %*% s.hat)
+        rsd <- sd(residuals[,j])
+        for(g in 1:G){
+          idx <- which(rms.obj$Cpn.mat[,g] > 0)
+          qq <- quantile(residuals[idx,j], c(trim/2, 1-trim/2))
+          idd <- which(residuals[idx,j] < qq[1] | residuals[idx,j] > qq[2])
+          w[idx[idd]] <- 0
+        }
+        s.hat <- constrLS(rms.obj$Readcount.mat[,j], rms.obj$Cpn.mat, w, reltol, verbose)
+      }
+      beta.hat <- s.hat/sum(s.hat)
+      beta.matrix[,j] <- as.numeric(beta.hat)
     }
-    beta.hat <- s.hat/sum(s.hat)
-    beta.matrix[,j] <- as.numeric(beta.hat)
   }
   return(beta.matrix)
 }

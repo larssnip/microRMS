@@ -445,7 +445,7 @@ ggd <- ggdendrogram(dendro_data(tree),
 print(ggd)
 ```
 
-Note that no correlation distance are now below 0.20, and we expect to be able to separate these genomes fairly well. In [Snipen et al (2020)]() we demonstrate this on a much larger collection of *E. coli* genomes. Note also that this is something you do *in silico* prior to any experimental efforts, since it only involves the sequenced genomes. Having sequenced some samples, you proceed as in tutorial 1 in order to estimate how abundant these clusters are in the samples.
+Note that no correlation distance are now below 0.20, and we expect to be able to separate these genomes fairly well. In [Snipen et al (2021)](https://pubmed.ncbi.nlm.nih.gov/33781324/){target="blank"} we demonstrate this on a much larger collection of *E. coli* genomes. Note also that this is something you do *in silico* prior to any experimental efforts, since it only involves the sequenced genomes. Having sequenced some samples, you proceed as in tutorial 1 in order to estimate how abundant these clusters are in the samples.
 
 
 
