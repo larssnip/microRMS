@@ -25,7 +25,7 @@ ensures the added element is correctly named \code{Sample.tbl}.
 If the supplied \code{rms.obj} already contains a \code{Sample.tbl}, it is simply replaced by the new \code{sample.tbl}.
 
 The \code{sample.tbl} must contain at least the two columns \code{sample_id} and 
-\code{reads_file}. The first is a unique text to identify each sample, the latter is
+\code{fasta_file}. The first is a unique text to identify each sample, the latter is
 the name of the fasta file with processed reads, see \code{\link{readMapper}}.
 }
 \examples{
