@@ -7,6 +7,7 @@
 RMSobject(
   genome.tbl,
   frg.dir,
+  vsearch.exe = "vsearch",
   identity = 0.99,
   min.length = 30,
   max.length = 500,
@@ -18,6 +19,8 @@ RMSobject(
 \item{genome.tbl}{A table (data.frame or tibble) with genome information, see below.}
 
 \item{frg.dir}{Path to folder with fragment fasta files.}
+
+\item{vsearch.exe}{Text with the VSEARCH executable command.}
 
 \item{identity}{The sequence identity for clustering fragments (0.0-1.0).}
 
@@ -57,6 +60,10 @@ names of the fasta files containing the RMS fragments from each genome. Use \cod
 to create these fasta files, ensuring the fasta headers follow the pattern
 <genome.ID>_RMSx, where <genome.ID> is some text unique to each genome and x is some integer.
 The \code{genome.tbl} may contain other columns as well, but \code{genome_file} is required.
+
+The \code{vsearch.exe} is the exact command to invoke the VSEARCH software. This is normally just "vsearch", 
+but if you run this as a singularity container (or any other container) it may be something like
+"singularity exec <container_name> vsearch".
 }
 \examples{
 

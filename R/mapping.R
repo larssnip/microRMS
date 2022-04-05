@@ -5,6 +5,7 @@
 #'
 #' @param rms.obj A \code{list} with the tables \code{Sample.tbl} and \code{Cluster.tbl}, see details below.
 #' @param fa.dir A path to where the fasta files with reads are located.
+#' @param vsearch.exe Text with the VSEARCH executable command.
 #' @param identity Identity threshold for mapping (0.0-1.0).
 #' @param threads Number of threads to be used by vsearch (integer).
 #' @param min.length Minimum fragment length used by vsearch (integer).
@@ -25,6 +26,10 @@
 #' texts in the \code{Sample.tbl}. The first token in the \code{Header} of the \code{Cluster.tbl} 
 #' are used as row names.
 #'
+#' The \code{vsearch.exe} is the exact command to invoke the VSEARCH software. This is normally just "vsearch", 
+#' but if you run this as a singularity container (or any other container) it may be something like
+#' "singularity exec <container_name> vsearch".
+#'
 #' @return An RMS object with the matrix \code{Readcount.mat} added. Also, two new columns, 
 #' \code{reads_total} and \code{reads_mapped}, have been added to the \code{Sample.tbl}.
 #'
@@ -39,7 +44,7 @@
 #'
 #' @export readMapper
 #'
-readMapper <- function(rms.obj, fa.dir, identity = 0.99, threads = 1, min.length = 30, verbose = TRUE){
+readMapper <- function(rms.obj, fa.dir, vsearch.exe = "vsearch", identity = 0.99, threads = 1, min.length = 30, verbose = TRUE){
   if(!exists("Sample.tbl", where = rms.obj)) stop("The rms.obj must contain a Sample.tbl")
   if(length(grep("sample_id", colnames(rms.obj$Sample.tbl))) == 0) stop("The rms.obj$Sample.tbl must contain a column sample_id")
   if(length(grep("fasta_file", colnames(rms.obj$Sample.tbl))) == 0) stop("The rms.obj$Sample.tbl must contain a column fasta_file")
@@ -49,7 +54,7 @@ readMapper <- function(rms.obj, fa.dir, identity = 0.99, threads = 1, min.length
   if(!exists("Cluster.tbl", where = rms.obj)) stop("The rms.obj must contain a Cluster.tbl")
   if(length(grep("Header", colnames(rms.obj$Cluster.tbl))) == 0) stop("The rms.obj$Cluster.tbl must contain a column Header")
   if(length(grep("Sequence", colnames(rms.obj$Cluster.tbl))) == 0) stop("The rms.obj$Cluster.tbl must contain a column Sequence")
-  ok <- available.external("vsearch")
+  ok <- available.external(vsearch.exe)
   tags <- word(rms.obj$Cluster.tbl$Header, 1, 1, sep = ";")
   RMS.counts <- matrix(0, nrow = length(tags), ncol = nrow(rms.obj$Sample.tbl))
   rownames(RMS.counts) <- tags
@@ -60,7 +65,7 @@ readMapper <- function(rms.obj, fa.dir, identity = 0.99, threads = 1, min.length
   tot <- numeric(nrow(rms.obj$Sample.tbl))
   for(i in 1:nrow(rms.obj$Sample.tbl)){
     if(verbose) cat("Mapping reads from sample", rms.obj$Sample.tbl$sample_id[i], "...\n")
-    cmd <- paste("vsearch",
+    cmd <- paste(vsearch.exe,
                  "--threads", threads,
                  "--usearch_global", file.path(fa.dir, rms.obj$Sample.tbl$fasta_file[i]),
                  "--db", centroids.file,

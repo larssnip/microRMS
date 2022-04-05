@@ -5,6 +5,7 @@
 #'
 #' @param genome.tbl A table (data.frame or tibble) with genome information, see below.
 #' @param frg.dir Path to folder with fragment fasta files.
+#' @param vsearch.exe Text with the VSEARCH executable command.
 #' @param identity The sequence identity for clustering fragments (0.0-1.0).
 #' @param min.length Minimum fragment length (integer).
 #' @param max.length Maximum fragment length (integer).
@@ -17,6 +18,10 @@
 #' to create these fasta files, ensuring the fasta headers follow the pattern
 #' <genome.ID>_RMSx, where <genome.ID> is some text unique to each genome and x is some integer.
 #' The \code{genome.tbl} may contain other columns as well, but \code{genome_file} is required.
+#' 
+#' The \code{vsearch.exe} is the exact command to invoke the VSEARCH software. This is normally just "vsearch", 
+#' but if you run this as a singularity container (or any other container) it may be something like
+#' "singularity exec <container_name> vsearch".
 #'
 #' @return A list with the following objects: \code{Cluster.tbl}, \code{Cpn.mat}
 #' and \code{Genome.tbl}.
@@ -51,7 +56,7 @@
 #' 
 #' @export RMSobject
 #'
-RMSobject <- function(genome.tbl, frg.dir, identity = 0.99, min.length = 30, max.length = 500, verbose = TRUE, threads = 1){
+RMSobject <- function(genome.tbl, frg.dir, vsearch.exe = "vsearch", identity = 0.99, min.length = 30, max.length = 500, verbose = TRUE, threads = 1){
   if(length(grep("genome_id", colnames(genome.tbl))) == 0) stop("The genome.tbl must contain a column 'genome_id' with unique texts")
   if(length(genome.tbl$genome_id) != length(unique(genome.tbl$genome_id))) stop("The genome_id's must be unique for each genome (row)")
   if(length(grep("genome_file", colnames(genome.tbl))) == 0) stop("The genome.tbl must contain a column 'genome_file' with filenames")
@@ -59,7 +64,7 @@ RMSobject <- function(genome.tbl, frg.dir, identity = 0.99, min.length = 30, max
   ok <- file.exists(frg_files)
   idx <- which(!ok)
   if(length(idx) > 0) stop("The file(s)", frg_files[idx], "does not exist")
-  ok <- available.external("vsearch")
+  ok <- available.external(vsearch.exe)
   is.gz <- unique(str_detect(genome.tbl$genome_file, "\\.gz$"))
   if(length(is.gz) != 1) stop("Either all or none of the fragment files must be compressed")
   ext <- ifelse(is.gz, ".fasta.gz", ".fasta")
@@ -75,7 +80,7 @@ RMSobject <- function(genome.tbl, frg.dir, identity = 0.99, min.length = 30, max
   if(verbose) cat("VSEARCH clustering of RMS fragments...\n")
   ctr.file <- tempfile(pattern = "centroide", fileext = ".fasta")
   uc.file <- tempfile(pattern = "uc", fileext = ".txt")
-  cmd <- paste("vsearch",
+  cmd <- paste(vsearch.exe,
                "--threads", threads,
                "--cluster_fast", all.frg,
                "--id", identity,

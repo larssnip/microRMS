@@ -26,7 +26,7 @@ The \code{rms.obj} must be a list with the required data structures. It must hav
 also have a \code{Readcount.mat}, which is added by the \code{\link{readMapper}}.
 
 The pruning means sample where the fraction of mapped reads to the total number of reads is below
-the threshold set by \code{mapping.threshold}. If very few reads are mapped, it probably indicates
+the threshold set by \code{mapping.threshold}. If very small fraction of reads are mapped, it probably indicates
 none of the genomes are present in the sample, and even if abundance estimates can be made they are
 also very unreliable in such cases.
 }

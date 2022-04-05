@@ -7,6 +7,7 @@
 readMapper(
   rms.obj,
   fa.dir,
+  vsearch.exe = "vsearch",
   identity = 0.99,
   threads = 1,
   min.length = 30,
@@ -17,6 +18,8 @@ readMapper(
 \item{rms.obj}{A \code{list} with the tables \code{Sample.tbl} and \code{Cluster.tbl}, see details below.}
 
 \item{fa.dir}{A path to where the fasta files with reads are located.}
+
+\item{vsearch.exe}{Text with the VSEARCH executable command.}
 
 \item{identity}{Identity threshold for mapping (0.0-1.0).}
 
@@ -48,6 +51,10 @@ This results in a matrix of read counts, with one row for each fragment cluster 
 for each sample. The column names of this matrix are the \code{sample_id}
 texts in the \code{Sample.tbl}. The first token in the \code{Header} of the \code{Cluster.tbl} 
 are used as row names.
+
+The \code{vsearch.exe} is the exact command to invoke the VSEARCH software. This is normally just "vsearch", 
+but if you run this as a singularity container (or any other container) it may be something like
+"singularity exec <container_name> vsearch".
 }
 \examples{
 
