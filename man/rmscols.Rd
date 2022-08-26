@@ -35,9 +35,6 @@ the copy number matrix \code{Cpn.mat} is constructed, based on RMS fragments in 
 In addition, a matrix of readcounts from one or more samples is required to be found in
 \code{rms.obj$Readcount.mat}, see \code{\link{readMapper}} and tutorial for more details on this.
 }
-\examples{
-
-}
 \seealso{
 \code{\link{RMSobject}}, \code{\link{readMapper}}.
 }

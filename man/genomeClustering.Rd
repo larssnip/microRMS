@@ -43,9 +43,6 @@ Two (or more) fairly uncorrelated genomes may still combine into something very 
 in reality this rarely happens. Use the \code{\link{conditionValue}} function on the resulting \code{Cpn.mat} to
 see if the clustering resulted in a lowering of the condition value to a tolerable size (e.g. around 1000 or less).
 }
-\examples{
-
-}
 \seealso{
 \code{\link{conditionValue}}.
 }

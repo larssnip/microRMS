@@ -28,9 +28,6 @@ The \code{sample.tbl} must contain at least the two columns \code{sample_id} and
 \code{fasta_file}. The first is a unique text to identify each sample, the latter is
 the name of the fasta file with processed reads, see \code{\link{readMapper}}.
 }
-\examples{
-
-}
 \seealso{
 \code{\link{RMSobject}}.
 }

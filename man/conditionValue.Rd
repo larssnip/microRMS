@@ -19,9 +19,6 @@ Computes the condition number for the cross-product of a sparse matrix to itself
 The condition number for X'X reflects how close this matrix is to being singular,
 i.e. impossible to invert. The larger condition value, the closer it is to being singular.
 }
-\examples{
-
-}
 \seealso{
 \code{\link{genomeClustering}}.
 }

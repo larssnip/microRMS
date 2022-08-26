@@ -56,9 +56,6 @@ The \code{vsearch.exe} is the exact command to invoke the VSEARCH software. This
 but if you run this as a singularity container (or any other container) it may be something like
 "singularity exec <container_name> vsearch".
 }
-\examples{
-
-}
 \seealso{
 \code{\link{RMSobject}}, \code{\link{rmscols}}.
 }

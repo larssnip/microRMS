@@ -26,9 +26,6 @@ Reducing the RMS readcount bias that is due to fragment length.
 RMS amplicon signals (readcounts) usually have some bias due to varying lengths. This
 function attempts to remove this bias. It has been described in detail in Snipen et al, 2019.
 }
-\examples{
-
-}
 \author{
 Lars Snipen.
 }

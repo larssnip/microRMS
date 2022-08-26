@@ -19,9 +19,6 @@ Computes the correlation distances between pairs of columns of a sparse matrix.
 The correlation distance between two columns of a matrix is simply 1 minus the
 correlation between them.
 }
-\examples{
-
-}
 \seealso{
 \code{\link{genomeClustering}}.
 }

@@ -30,9 +30,6 @@ the threshold set by \code{mapping.threshold}. If very small fraction of reads a
 none of the genomes are present in the sample, and even if abundance estimates can be made they are
 also very unreliable in such cases.
 }
-\examples{
-
-}
 \seealso{
 \code{\link{RMSobject}}, \code{\link{readMapper}}, \code{\link{rmscols}}.
 }

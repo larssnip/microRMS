@@ -12,7 +12,8 @@ RMSobject(
   min.length = 30,
   max.length = 500,
   verbose = TRUE,
-  threads = 1
+  threads = 1,
+  tmp.dir = "tmp_rms"
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ RMSobject(
 \item{verbose}{Turn on/off output text during processing (logical).}
 
 \item{threads}{Number of threads to be used by \code{vsearch} (integer).}
+
+\item{tmp.dir}{Name of folder for temporary output, will be created if not already existing.}
 }
 \value{
 A list with the following objects: \code{Cluster.tbl}, \code{Cpn.mat}
@@ -63,10 +66,7 @@ The \code{genome.tbl} may contain other columns as well, but \code{genome_file} 
 
 The \code{vsearch.exe} is the exact command to invoke the VSEARCH software. This is normally just "vsearch", 
 but if you run this as a singularity container (or any other container) it may be something like
-"singularity exec <container_name> vsearch".
-}
-\examples{
-
+"srun singularity exec <container_name> vsearch".
 }
 \seealso{
 \code{\link{getRMSfragments}}.
