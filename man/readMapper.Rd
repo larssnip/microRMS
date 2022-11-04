@@ -11,7 +11,8 @@ readMapper(
   identity = 0.99,
   threads = 1,
   min.length = 30,
-  verbose = TRUE
+  verbose = TRUE,
+  tmp.dir = "tmp_rms"
 )
 }
 \arguments{

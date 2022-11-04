@@ -44,7 +44,9 @@
 #'
 #' @export readMapper
 #'
-readMapper <- function(rms.obj, fa.dir, vsearch.exe = "vsearch", identity = 0.99, threads = 1, min.length = 30, verbose = TRUE){
+readMapper <- function(rms.obj, fa.dir, vsearch.exe = "vsearch", identity = 0.99,
+                       threads = 1, min.length = 30, verbose = TRUE,
+                       tmp.dir = "tmp_rms"){
   if(!exists("Sample.tbl", where = rms.obj)) stop("The rms.obj must contain a Sample.tbl")
   if(length(grep("sample_id", colnames(rms.obj$Sample.tbl))) == 0) stop("The rms.obj$Sample.tbl must contain a column sample_id")
   if(length(grep("fasta_file", colnames(rms.obj$Sample.tbl))) == 0) stop("The rms.obj$Sample.tbl must contain a column fasta_file")
@@ -59,9 +61,9 @@ readMapper <- function(rms.obj, fa.dir, vsearch.exe = "vsearch", identity = 0.99
   RMS.counts <- matrix(0, nrow = length(tags), ncol = nrow(rms.obj$Sample.tbl))
   rownames(RMS.counts) <- tags
   colnames(RMS.counts) <- rms.obj$Sample.tbl$sample_id
-  centroids.file <- tempfile(pattern = "centroid", fileext = ".fasta")
+  centroids.file <- file.path(tmp.dir, "centroids.fasta")
   writeFasta(rms.obj$Cluster.tbl, out.file = centroids.file)
-  tab.file <- tempfile(pattern = "rmstab", fileext = ".txt")
+  tab.file <- file.path(tmp.dir, "rmstab.txt")
   tot <- numeric(nrow(rms.obj$Sample.tbl))
   for(i in 1:nrow(rms.obj$Sample.tbl)){
     if(verbose) cat("Mapping reads from sample", rms.obj$Sample.tbl$sample_id[i], "...\n")
@@ -89,6 +91,8 @@ readMapper <- function(rms.obj, fa.dir, vsearch.exe = "vsearch", identity = 0.99
   ok <- file.remove(tab.file, centroids.file)
   rms.obj$Sample.tbl %>% 
     mutate(reads_total = tot, reads_mapped = colSums(RMS.counts)) -> rms.obj$Sample.tbl
+  file.remove(centroids.file, tab.file)
+  
   return(c(rms.obj, list(Readcount.mat = RMS.counts)))
 }
 
