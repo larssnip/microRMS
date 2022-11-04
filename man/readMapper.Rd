@@ -29,6 +29,8 @@ readMapper(
 \item{min.length}{Minimum fragment length used by vsearch (integer).}
 
 \item{verbose}{Turn on/off output text during processing (logical).}
+
+\item{tmp.dir}{Folder for temporary files.}
 }
 \value{
 An RMS object with the matrix \code{Readcount.mat} added. Also, two new columns, 

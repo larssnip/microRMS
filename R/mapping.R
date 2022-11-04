@@ -10,6 +10,7 @@
 #' @param threads Number of threads to be used by vsearch (integer).
 #' @param min.length Minimum fragment length used by vsearch (integer).
 #' @param verbose Turn on/off output text during processing (logical).
+#' @param tmp.dir Folder for temporary files.
 #' 
 #' @details The \code{rms.obj} must be a list with the required data structures for mapping
 #' reads, i.e. it must contain a \code{Sample.tbl}, see \code{\link{addSampleTable}}. Note
