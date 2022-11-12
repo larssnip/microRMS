@@ -70,6 +70,7 @@ RMSobject <- function(genome.tbl, frg.dir, vsearch.exe = "vsearch", identity = 0
   is.gz <- unique(str_detect(genome.tbl$genome_file, "\\.gz$"))
   if(length(is.gz) != 1) stop("Either all or none of the fragment files must be compressed")
   ext <- ifelse(is.gz, ".fasta.gz", ".fasta")
+  if(!base::dir.exists(tmp.dir)) dir.create(tmp.dir, recursive = T)
   all.frg <- file.path(tmp.dir, str_c("all_frg", ext))
   ok <- file.append(file1 = all.frg, file2 = frg_files)
   if(min(ok) == 0) stop("Could not copy all fragment fasta files from", frg.dir)

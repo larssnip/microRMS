@@ -57,13 +57,14 @@ readMapper <- function(rms.obj, fa.dir, vsearch.exe = "vsearch", identity = 0.99
   if(!exists("Cluster.tbl", where = rms.obj)) stop("The rms.obj must contain a Cluster.tbl")
   if(length(grep("Header", colnames(rms.obj$Cluster.tbl))) == 0) stop("The rms.obj$Cluster.tbl must contain a column Header")
   if(length(grep("Sequence", colnames(rms.obj$Cluster.tbl))) == 0) stop("The rms.obj$Cluster.tbl must contain a column Sequence")
-  ok <- available.external(vsearch.exe)
+  
   tags <- word(rms.obj$Cluster.tbl$Header, 1, 1, sep = ";")
   RMS.counts <- matrix(0, nrow = length(tags), ncol = nrow(rms.obj$Sample.tbl))
   rownames(RMS.counts) <- tags
   colnames(RMS.counts) <- rms.obj$Sample.tbl$sample_id
   centroids.file <- file.path(tmp.dir, "centroids.fasta")
   writeFasta(rms.obj$Cluster.tbl, out.file = centroids.file)
+  if(!dir.exists(tmp.dir)) dir.create(tmp.dir)
   tab.file <- file.path(tmp.dir, "rmstab.txt")
   tot <- numeric(nrow(rms.obj$Sample.tbl))
   for(i in 1:nrow(rms.obj$Sample.tbl)){
@@ -90,9 +91,8 @@ readMapper <- function(rms.obj, fa.dir, vsearch.exe = "vsearch", identity = 0.99
     tot[i] <- stb$size_sum
   }
   ok <- file.remove(tab.file, centroids.file)
-  rms.obj$Sample.tbl %>% 
-    mutate(reads_total = tot, reads_mapped = colSums(RMS.counts)) -> rms.obj$Sample.tbl
-  file.remove(centroids.file, tab.file)
+  rms.obj$Sample.tbl <- rms.obj$Sample.tbl %>% 
+    mutate(reads_total = tot, reads_mapped = colSums(RMS.counts))
   
   return(c(rms.obj, list(Readcount.mat = RMS.counts)))
 }

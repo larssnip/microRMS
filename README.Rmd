@@ -23,13 +23,9 @@ Next, you should be able to install this package by
 devtools::install_github("larssnip/microrms")
 ```
 
-Several of the R functions calls upon the software `vsearch` that must be installed and available on the system, see [VSEARCH on GitHub](https://github.com/torognes/vsearch). To test if `vsearch` is available from R, type 
-```{r, eval=FALSE}
-system("vsearch -h")
-```
-in the Console, and return. A long Help-text should be displayed. If not, you need to install `vsearch` and edit your PATH environment variable to make it available. On UNIX systems you probably need to make use of the .Renviron and/or .Rprofile files for making it visible inside R.
+The R functions `RMSobject()` and `readMapper()` calls upon the external software `vsearch` that must be installed and available on the system, see [VSEARCH on GitHub](https://github.com/torognes/vsearch). You need to know how to start `vsearch` on your system, and these functions have the argument `vsearch.exe` where you specify the exact text that will run `vsearch`. As an example, in Windows the command to start `vsearch` is simply `"vsearch"`, but in case you run it as a singularity container the corresponding command would perhaps be `"singularity exec <container_name> vsearch"` or something along that line.
 
-Below are two short tutorial, to get you going. The first shows a basic nalysis on a very small data set. The second digs more into the resolution of this method.
+Below are two short tutorial, to get you going. The first shows a basic analysis on a very small data set. The second digs more into the resolution of this method.
 
 
 # Tutorial 1 - microbial community composition
@@ -65,11 +61,6 @@ The `genome_id` should be a text without spaces, and unique to each genome. It i
 The `genome_file` column specify the genome fasta files, but without the path to where they are located. *Keep it this way*. The reason is we re-use these filenames for the fragment fasta files, but in another folder. Thus, we supply the path as a separate argument when needed.
 
 The first code chunk reads genomes, collect their RMS fragments, and store these as fasta files in the `frg/` folder:
-```{r, echo=FALSE, eval=FALSE}
-source("/usr/share/lmod/lmod/init/R")
-Sys.setenv(MODULEPATH = '/local/genome/modules')
-module("load vsearch")
-```
 ```{r, message=FALSE}
 library(tidyverse)
 library(microrms)
@@ -94,8 +85,10 @@ Select the genomes you want to be able to recognize later. This means you may `s
 
 The creation of the RMS object requires the use of the `vsearch` software for clustering. The function `RMSobject()` will not work unless `vsearch` is a valid command in your system/computer.
 ```{r}
-rms.obj <- RMSobject(genome.tbl, frg.dir)
+rms.obj <- RMSobject(genome.tbl, frg.dir, vsearch.exe = "vsearch", tmp = "tmp")
 ```
+Note that you need to specify some folder for temporary output (`"tmp"`). You may delete its content after the computations are finished.
+
 The clustering of these fragments results in more than 17000 clusters, using the default `identity`, see `?RMSobject`. The resulting object `rms.obj` is a `list` with two tables and a matrix.
 
 The `rms.obj$Genome.tbl` is a copy of the `genome.tbl`, but has got two new columns, and should be inspected right away. The column `N_clusters` lists the number of fragment clusters in each genome, and `N_unique` how many of these are unique to each genome:
@@ -144,17 +137,18 @@ All branches look deep and nice here, with correlation distances above 0.9. If b
 ## Processing reads
 The read processing means essentially taking the fastq files from sequencing as input and producing a fasta file as output, for each sample. This step is independent of what we did above. You only do this once for each sample, and it is the resulting fasta files we use in the downstream analysis.
 
-The data from sequencing are the paired fastq files in the folder `fastq/`. Again, it is reccomended to have a table like the one in `fastq/sample_table.txt` with metadata about each sample. There should always be a column `sample_id` with a unique text for each sample. Also, this `sample.tbl` has two columns `R1_file` and `R2_file` specifying the corresponding fastq filenames.
+The data from sequencing are the paired fastq files in the folder `fastq/`. Again, it is recommended to have a table like the one in `fastq/sample_table.txt` with metadata about each sample. There should always be a column `sample_id` with a unique text for each sample. Also, this `sample.tbl` has two columns `R1_file` and `R2_file` specifying the corresponding fastq file names.
 
-In addition we also create the required column `fasta_file` below, containing the name of the resulting fasta files with reads for each sample. Here we create this from the `sample_id`, which means this text must be useful as a filename prefix (e.g. no `/` or spaces inside). The table may contain this column already, with no need to create it. Again, paths *should not* be part of any filenames, we supply them as separate inputs. Below we output these files to the `fasta` folder.
+In addition we also create the required column `fasta_file` below, containing the name of the resulting fasta files with reads for each sample. Here we create this from the `sample_id`, which means this text must be useful as a file name prefix (e.g. no `/` or spaces inside). The table may contain this column already, with no need to create it. Again, paths *should not* be part of any file names, we supply them as separate inputs. Below we output these files to the `fasta` folder.
 
 There is no R function for doing the read processing, since this may be done in many different ways. Here is an R script with some suggested code for doing this processing using the `vsearch` software. Note the explicit decompression of the fastq-files. This is only added here in case you run this on a Windows 10 computer, on which we have found `vsearch` is not capable of reading gzipped files. On all other system these code-chunks should be deleted, and `vsearch` will read compressed files directly. The (long) screen output from this is hidden in this document:
 ```{r, results='hide'}
 #################
 ### The settings
-fq.dir <- "fastq"   # path to folder with (input) fastq files
-fa.dir <- "fasta"   # path to folder with (output) fasta files
-tmp.dir <- "tmp"    # temporary files, delete in the end
+vsearch.exe <- "vsearch"  # command to start vsearch
+fq.dir <- "fastq"         # path to folder with (input) fastq files
+fa.dir <- "fasta"         # path to folder with (output) fasta files
+tmp.dir <- "tmp"          # temporary files, delete in the end
 PCR.forward.primer <- "GACTGCGTACCAATTC"
 PCR.reverse.primer <- "GATGAGTCCTGAGTAA"
 min.read.length <- 30
@@ -162,8 +156,9 @@ maxee <- 0.02
 
 #####################
 ### The sample table
-suppressMessages(read_delim("fastq/sample_table.txt", delim = "\t")) %>% 
-  mutate(fasta_file = str_c(sample_id, ".fasta")) -> sample.tbl
+sample.tbl <- suppressMessages(read_delim("fastq/sample_table.txt",
+                                          delim = "\t")) %>% 
+  mutate(fasta_file = str_c(sample_id, ".fasta"))
 
 ############################################################
 ### Looping over all samples
@@ -185,7 +180,7 @@ for(i in 1:nrow(sample.tbl)){
   ##-- end code chunk for Windows 10
   
   cat("\n\n##### VSEARCH quality filtering sample", sample.tbl$sample_id[i], "...\n")
-  cmd <- paste("vsearch",
+  cmd <- paste(vsearch.exe,
                "--fastq_filter", file.path(fq.dir, sample.tbl$R1_file[i]),
                "--reverse",      file.path(fq.dir, sample.tbl$R2_file[i]),
                "--fastq_maxee_rate", maxee,
@@ -194,7 +189,7 @@ for(i in 1:nrow(sample.tbl)){
   system(cmd)
   
   cat("\n\n##### VSEARCH mergings read-pairs...\n")
-  cmd <- paste("vsearch",
+  cmd <- paste(vsearch.exe,
                "--fastq_mergepairs", file.path(tmp.dir, "filtered_R1.fq"),
                "--reverse",          file.path(tmp.dir, "filtered_R2.fq"),
                "--fastq_allowmergestagger",
@@ -205,7 +200,7 @@ for(i in 1:nrow(sample.tbl)){
   system(cmd)
   
   cat("\n\n##### VSEARCH trimming primers from merged reads...\n")
-  cmd <- paste("vsearch",
+  cmd <- paste(vsearch.exe,
                "--fastx_filter", file.path(tmp.dir, "merged.fa"),
                "--fastq_stripleft",  Nf,
                "--fastq_stripright", Nr,
@@ -215,14 +210,14 @@ for(i in 1:nrow(sample.tbl)){
   system(cmd)
   
   cat("\n\n##### VSEARCH trimming primers from un-merged reads...\n")
-  cmd <- paste("vsearch",
+  cmd <- paste(vsearch.exe,
                "--fastq_filter", file.path(tmp.dir, "notmerged_R1.fq"),
                "--fastq_stripleft", Nf,
                "--fastq_minlen", min.read.length,
                "--relabel", str_c("'size=1;notmerged_R1_'"),
                "--fastaout", file.path(tmp.dir, "notmerged_R1_filt.fa"))
   system(cmd)
-  cmd <- paste("vsearch",
+  cmd <- paste(vsearch.exe,
                "--fastq_filter", file.path(tmp.dir, "notmerged_R2.fq"),
                "--fastq_stripleft", Nr,
                "--fastq_minlen", min.read.length,
@@ -233,7 +228,7 @@ for(i in 1:nrow(sample.tbl)){
   cat("\n\n##### VSEARCH adding all reads to one fasta-file...\n")
   ok <- file.append(file1 = file.path(tmp.dir, "merged_filt.fa"),
                     file2 = file.path(tmp.dir, "notmerged_R1_filt.fa"))
-  cmd <- paste("vsearch",
+  cmd <- paste(vsearch.exe,
                "--fastx_revcomp", file.path(tmp.dir, "notmerged_R2_filt.fa"),
                "--fastaout", file.path(tmp.dir, "notmerged_R2_filt_rc.fa"))
   system(cmd)
@@ -241,7 +236,7 @@ for(i in 1:nrow(sample.tbl)){
                     file2 = file.path(tmp.dir, "notmerged_R2_filt_rc.fa"))
  
   cat("\n\n##### VSEARCH de-replicating sample", sample.tbl$sample_id[i], "...\n")
-  cmd <- paste("vsearch",
+  cmd <- paste(vsearch.exe,
                "--derep_fulllength", file.path(tmp.dir, "merged_filt.fa"),
                "--minuniquesize", 1,
                "--minseqlength", min.read.length,
@@ -278,7 +273,7 @@ The next step is to map reads from each sample to the fragment clusters, and obt
 ### The readcount matrix
 The `readMapper()` function needs the `rms.obj` with information about fragment clusters (`rms.obj$Cluster.tbl`) and samples (`rms.obj$Sample.tbl`), and uses `vsearch` to search with reads against the fragment cluster centroids. The path to the fasta files with processed reads is also required, since the `rms.obj$Sample.tbl` has the filenames, but not their path. 
 ```{r}
-rms.obj <- readMapper(rms.obj, fa.dir)
+rms.obj <- readMapper(rms.obj, fa.dir, vsearch.exe = "vsearch", tmp.dir = "tmp")
 ```
 The matrix `Readcount.mat` is added as a new component to the returned `rms.obj`. There should be one column for each sample and one row for each fragment cluster. Here are the first rows:
 ```{r}
@@ -393,7 +388,7 @@ In the folder `ecoli_frg` we have the RMS fragment files for a random selection 
 library(tidyverse)
 library(microrms)
 ecoli.tbl <- read_delim("ecoli_frg/genome_table.txt", delim = "\t")
-ecoli.rms.obj <- RMSobject(ecoli.tbl, frg.dir = "ecoli_frg", tmp = "tmp")
+ecoli.rms.obj <- RMSobject(ecoli.tbl, frg.dir = "ecoli_frg", vsearch.exe = "vsearch", tmp = "tmp")
 ```
 Notice that these 50 genomes produces 'only' 8602 fragment clusters, which is half of what the 10 genomes in tutorial 1 had. This is of course because here all genomes are from the same species, and they share many fragments. By inspecting the `Genome.tbl` we can see how many unique clusters each genome has:
 ```{r}
