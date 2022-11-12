@@ -47,7 +47,7 @@
 #'
 readMapper <- function(rms.obj, fa.dir, vsearch.exe = "vsearch", identity = 0.99,
                        threads = 1, min.length = 30, verbose = TRUE,
-                       tmp.dir = "tmp_rms"){
+                       tmp.dir = "tmp"){
   if(!exists("Sample.tbl", where = rms.obj)) stop("The rms.obj must contain a Sample.tbl")
   if(length(grep("sample_id", colnames(rms.obj$Sample.tbl))) == 0) stop("The rms.obj$Sample.tbl must contain a column sample_id")
   if(length(grep("fasta_file", colnames(rms.obj$Sample.tbl))) == 0) stop("The rms.obj$Sample.tbl must contain a column fasta_file")

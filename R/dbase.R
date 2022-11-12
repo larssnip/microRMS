@@ -59,7 +59,7 @@
 #'
 RMSobject <- function(genome.tbl, frg.dir, vsearch.exe = "vsearch", identity = 0.99,
                       min.length = 30, max.length = 500, verbose = TRUE, threads = 1,
-                      tmp.dir = "tmp_rms"){
+                      tmp.dir = "tmp"){
   if(length(grep("genome_id", colnames(genome.tbl))) == 0) stop("The genome.tbl must contain a column 'genome_id' with unique texts")
   if(length(genome.tbl$genome_id) != length(unique(genome.tbl$genome_id))) stop("The genome_id's must be unique for each genome (row)")
   if(length(grep("genome_file", colnames(genome.tbl))) == 0) stop("The genome.tbl must contain a column 'genome_file' with filenames")

@@ -13,7 +13,7 @@ RMSobject(
   max.length = 500,
   verbose = TRUE,
   threads = 1,
-  tmp.dir = "tmp_rms"
+  tmp.dir = "tmp"
 )
 }
 \arguments{

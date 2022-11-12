@@ -4,12 +4,14 @@
 \alias{genomeClustering}
 \title{Clustering genomes based on shared RMS fragments}
 \usage{
-genomeClustering(rms.obj, max.cond = 1000)
+genomeClustering(rms.obj, max.cond = 1000, verbose = TRUE)
 }
 \arguments{
 \item{rms.obj}{A \code{list} with RMS data structures, see \code{\link{RMSobject}}.}
 
 \item{max.cond}{Maximum condition value tolerated, see Details.}
+
+\item{verbose}{Logical, turning on/off screen report on progress during clustering.}
 }
 \value{
 A updated RMS object, where \code{Genome.tbl} has an additional column named \code{members_genome_id}. This \code{Genome.tbl} 

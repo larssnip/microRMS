@@ -12,7 +12,7 @@ readMapper(
   threads = 1,
   min.length = 30,
   verbose = TRUE,
-  tmp.dir = "tmp_rms"
+  tmp.dir = "tmp"
 )
 }
 \arguments{

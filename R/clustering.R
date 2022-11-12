@@ -5,6 +5,7 @@
 #'
 #' @param rms.obj A \code{list} with RMS data structures, see \code{\link{RMSobject}}.
 #' @param max.cond Maximum condition value tolerated, see Details.
+#' @param verbose Logical, turning on/off screen report on progress during clustering.
 #'
 #' @details This function will cluster genomes based on how similar they are in RMS fragment content.
 #' The input is an RMS object (see \code{\link{RMSobject}}), with a \code{Genome.tbl} listing the genomes
@@ -43,25 +44,33 @@
 #'
 #' @export genomeClustering
 #'
-genomeClustering <- function(rms.obj, max.cond = 1000){
+genomeClustering <- function(rms.obj, max.cond = 1000, verbose = TRUE){
+  if(verbose) cat("genomeClustering:\n...starts with", ncol(rms.obj$Cpn.mat), "genomes...\n")
+  
+  if(verbose) cat("...computing correlation distances...\n")
   D <- corrDist(rms.obj$Cpn.mat)
   tree <- hclust(as.dist(D), method = "complete")
+  
+  if(verbose) cat("...finding maximum condition value = ")
   heights <- unique(c(0, sort(tree$height)))
   hh.lo <- heights[1]
   cc.lo <- log10(conditionValue(rms.obj$Cpn.mat))
+  if(verbose) cat(10^cc.lo, "...\n")
   if(cc.lo <= log10(max.cond)) return(rms.obj)
   
+  if(verbose) cat("...finding minimum condition value = ")
   hh.up <- heights[length(heights) - 1]
   idx <- medoids(D, cutree(tree, h = hh.up))
   X <- rms.obj$Cpn.mat[,idx, drop = F]
   cc.up <- log10(conditionValue(X))
+  if(verbose) cat(10^cc.up, "...\n")
   if(cc.up > log10(max.cond)){
     cat("Impossible to reach condition value", max.cond, "with these genomes\n")
     return(rms.obj)
   }
   # we have: cc.up < max.cond < cc.lo
   
-  # Search for optimal clustering
+  if(verbose) cat("...searching for optimal clustering...\n")
   idx2 <- 0
   idx1 <- 1
   while(idx1 != idx2){
@@ -70,6 +79,7 @@ genomeClustering <- function(rms.obj, max.cond = 1000){
     idx1 <- which(dd == min(dd))[1]
     hh <- heights[idx1]
     med.idx <- medoids(D, cutree(tree, h = hh))
+    if(verbose) cat("...", length(med.idx), "clusters...\n")
     cc <- log10(conditionValue(rms.obj$Cpn.mat[,med.idx, drop = F]))
     if(cc < log10(max.cond)){
       hh.up <- hh
@@ -84,13 +94,13 @@ genomeClustering <- function(rms.obj, max.cond = 1000){
     }
   }
   
-  # Finding cluster medoids and members
+  if(verbose) cat("...finding cluster members and medoides...\n")
   clst <- cutree(tree, h = hh)
   med.idx <- medoids(D, clst)
   clst.tbl <- tibble(genome_id = rownames(D)[med.idx],
                      members_genome_id = tapply(rownames(D), clst, str_c, collapse = ","))
 
-  # Pruning the data structure
+  if(verbose) cat("...pruning the data structure...\n")
   clst.tbl %>%
     left_join(rms.obj$Genome.tbl, by = "genome_id") -> rms.obj$Genome.tbl
   idx <- match(rms.obj$Genome.tbl$genome_id, colnames(rms.obj$Cpn.mat))
@@ -99,13 +109,14 @@ genomeClustering <- function(rms.obj, max.cond = 1000){
   rms.obj$Cluster.tbl %>%
     filter(Cluster %in% rownames(rms.obj$Cpn.mat)) -> rms.obj$Cluster.tbl
 
-  # Updating N.unique
+  if(verbose) cat("...updating N_unique...\n")
   pa <- (rms.obj$Cpn.mat > 0)
   pau <- pa[Matrix::rowSums(pa) == 1,]
   rms.obj$Genome.tbl %>%
     mutate(N_clusters = Matrix::colSums(pa)) %>%
     mutate(N_unique = Matrix::colSums(pau)) -> rms.obj$Genome.tbl
 
+  if(verbose) cat("...done!\n")
   return(rms.obj)
 }
 

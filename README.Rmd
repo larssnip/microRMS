@@ -393,7 +393,7 @@ In the folder `ecoli_frg` we have the RMS fragment files for a random selection 
 library(tidyverse)
 library(microrms)
 ecoli.tbl <- read_delim("ecoli_frg/genome_table.txt", delim = "\t")
-ecoli.rms.obj <- RMSobject(ecoli.tbl, frg.dir = "ecoli_frg")
+ecoli.rms.obj <- RMSobject(ecoli.tbl, frg.dir = "ecoli_frg", tmp = "tmp")
 ```
 Notice that these 50 genomes produces 'only' 8602 fragment clusters, which is half of what the 10 genomes in tutorial 1 had. This is of course because here all genomes are from the same species, and they share many fragments. By inspecting the `Genome.tbl` we can see how many unique clusters each genome has:
 ```{r}
@@ -421,7 +421,7 @@ How large condition value can we tolerate? The perfect value is 1, but this is n
 
 Let us 'prune' the genome collection such that we get a smaller set of genomes, that we are capable of separating better. This is done by *genome clustering*. Genomes who are too similar are clustered into a group, and only the centroide genome in this group is used in the analysis, as a representative for the group. We use the function `genomeClustering()` for this:
 ```{r}
-ecoli.rms.obj.cls100 <- genomeClustering(ecoli.rms.obj, max.cond = 100)
+ecoli.rms.obj.cls100 <- genomeClustering(ecoli.rms.obj, max.cond = 100, verbose = T)
 ```
 Here we specified that we tolerate a condition value of maximum 100. You would typically choose values of $10^1$, $10^2$, $10^3$ or $10^4$ here, even if any value above 1 is allowed. The resulting `ecoli.rms.obj.cls100` has a new `Genome.tbl` that we should inspect:
 ```{r}
