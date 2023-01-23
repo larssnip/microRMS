@@ -57,7 +57,7 @@ getRMSfragments <- function(genome, genome.id, min.length = 30, max.length = 500
     fsa <- gff2fasta(gff, genome) %>% 
       mutate(Sequence = str_sub(Sequence, ct.lft+1, -(ct.rght+1))) %>% 
       mutate(Length = str_length(Sequence)) %>%
-      filter((Length >= min.length) & (Length <= max.length))
+      filter((Length >= min.length) & (Length <= max.length)) %>% 
       mutate(Header = str_c(str_c(genome.id, str_c("RMS", 1:n()), sep = "_"), Header, sep = " "))
     if(nrow(fsa) == 0){
       if(verbose) cat("found no RMS-fragments within min and max length!\n")
