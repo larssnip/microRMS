@@ -132,6 +132,7 @@ getRMS <- function(genome, left, right){
       } # end if
     } # end if
   }  # end for
-  return(gff)
+  idx <- which(is.finite(gff$Start) & is.finite(gff$End))
+  return(gff[idx,])
 }
 
