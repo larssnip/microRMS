@@ -4,49 +4,63 @@
 \alias{genomeClustering}
 \title{Clustering genomes based on shared RMS fragments}
 \usage{
-genomeClustering(rms.obj, max.cond = 1000, verbose = TRUE)
+genomeClustering(rms.obj, max.corr = 0.8, verbose = TRUE)
 }
 \arguments{
 \item{rms.obj}{A \code{list} with RMS data structures, see \code{\link{RMSobject}}.}
 
-\item{max.cond}{Maximum condition value tolerated, see Details.}
+\item{max.corr}{Maximum correlation between genomes, see Details.}
 
 \item{verbose}{Logical, turning on/off screen report on progress during clustering.}
 }
 \value{
-A updated RMS object, where \code{Genome.tbl} has an additional column named \code{members_genome_id}. This \code{Genome.tbl} 
-typically has fewer rows than the original, one for each cluster, and this new column indicates which of the original
-genomes are grouped into each cluster. Each cluster is represented by one of the original genomes (the cluster medoide).
+An updated RMS object, where \code{Genome.tbl} has an additional 
+column named \code{members_genome_id}. This \code{Genome.tbl} typically has 
+fewer rows than the original, one for each cluster, and this new column
+indicates which of the original genomes are grouped into each cluster. Each
+cluster is represented by one of the original genomes (the cluster medoide).
 The other objects inside the RMS object have also been updated accordingly.
 }
 \description{
 Alters an RMS-object by clustering genomes who are too similar to distinguish.
 }
 \details{
-This function will cluster genomes based on how similar they are in RMS fragment content.
-The input is an RMS object (see \code{\link{RMSobject}}), with a \code{Genome.tbl} listing the genomes
-and a \code{Cpn.mat} holding the information about RMS fragments in each genome. The latter has a 
-column for genome.
+This function will cluster genomes based on how similar they are in 
+RMS fragment content. If two genomes are very similar with respect to RMS 
+fragment content, their corresponding columns in \code{rms.obj$Cpn.mat} are 
+highly correlated. If genomes are too correlated it is impossible to estimate
+their abundance separately, thus such genomes must be seen as a cluster, and 
+we only estimate the abundance of this cluster.
 
-The distance metric is 1 minus the correlation between the columns of \code{Cpn.mat}, i.e. if all RMS
-fragments found in genome A are exactly those found in genome B, the distance between them is 0. Conversely,
-if none of the fragments from genome A are found in genome B, the distance becomes 2 (maximum).
+Genomes are first represented as a graph, where two genomes are connected 
+with an edge if they share at least 1 RMS fragment. For many highly unrelated
+genomes this step will result in a disconnected graph, i.e. groups of genomes 
+not sharing any fragments between them. These graph components 
+are the first grouping of the genomes. Genomes sharing no fragments will 
+always end up in different clusters anyway. This step saves a lot of memory
+when the RMS object contain many and unrelated genomes, since all these
+computations can be done on a sparse \code{Matrix}.
 
-Clustering is done by hierchical clustering with complete linkage. Cutting the dendrogram tree at the various
-heights produce a unique clustering of the genomes. Each of the produces a new \code{Cpn.mat}, with one column for each
-genome cluster. The closer the genomes are to each other, the larger the condition number of this matrix. Thus, the
-argument \code{max.cond} specifies the maximum tolerated condition value. A smaller value means harder clustering (fewer
-genome clusters) but also more stable estimates of the abundance of each genome cluster. Conversely, a larger tolerated
-condition value results in more genome clusters, but also more uncertain abundance estimates of each. 
+Next, clustering within each graph component is done by hierarchical 
+clustering with complete linkage. The distance metric is 1 minus correlation, 
+i.e. genomes with a large correlation close to 1.0) has a small distance 
+(close to 0.0). The \code{max.corr} argument indicates where to cut the 
+dendrogram tree to group the genomes. With \code{max.corr = 0.8} we cut the 
+dendrogram at distance \code{0.2}. Note that the distance matrix cannot be
+a sparse \code{Matrix}, and if too many genomes in the \code{rms.obj} are
+in the same graph component, you may run into memory problems.
 
-More technical details: The problem of too similar genomes is reflected in a close to singular covariance matrix when
-de-convolving the genome abundances. Clustering by correlation distance is, in theory, no guarantee against this. 
-Two (or more) fairly uncorrelated genomes may still combine into something very correlated with a third genome. However,
-in reality this rarely happens. Use the \code{\link{conditionValue}} function on the resulting \code{Cpn.mat} to
-see if the clustering resulted in a lowering of the condition value to a tolerable size (e.g. around 1000 or less).
+More technical details: The problem of too similar genomes will be reflected in 
+a close to singular covariance matrix when de-convolving the genome 
+abundances. Clustering by correlation distance is, in theory, no guarantee 
+against this. Two (or more) fairly uncorrelated genomes may still combine 
+into something very correlated with a third genome. However, in reality this 
+rarely happens with RMS data. Use the \code{\link{conditionValue}} function on the 
+resulting \code{rms.obj$Cpn.mat} to see if the clustering resulted in a fairly
+low condition value to a tolerable size (e.g. around 1e+3 to 1e+4 or less).
 }
 \seealso{
-\code{\link{conditionValue}}.
+\code{\link{corrDist}}, \code{\link{conditionValue}}.
 }
 \author{
 Lars Snipen.

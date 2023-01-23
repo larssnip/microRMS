@@ -52,19 +52,18 @@ getRMSfragments <- function(genome, genome.id, min.length = 30, max.length = 500
   rght <- str_remove_all(right, "\\|")
   gff <- getRMS(genome, lft, rght)
   if(nrow(gff)>0){
-    gff %>%
-      mutate(Length = abs(Start - End) + 1) %>%
-      filter((Length >= min.length) & (Length <= max.length)) -> gff
-    if(verbose) cat("found", nrow(gff), "RMS-fragments\n")
-    if(nrow(gff) > 0){
-      ct.lft <- str_length(str_remove(left, "\\|.+"))
-      ct.rght <- str_length(str_remove(right, "\\|.+"))
-      gff2fasta(gff, genome) %>% 
-        mutate(Sequence = str_sub(Sequence, ct.lft+1, -(ct.rght+1))) %>% 
-        mutate(Header = str_c(str_c(genome.id, str_c("RMS", 1:n()), sep = "_"), Header, sep = " ")) -> fsa
-    } else {
+    ct.lft <- str_length(str_remove(left, "\\|.+"))
+    ct.rght <- str_length(str_remove(right, "\\|.+"))
+    fsa <- gff2fasta(gff, genome) %>% 
+      mutate(Sequence = str_sub(Sequence, ct.lft+1, -(ct.rght+1))) %>% 
+      mutate(Length = str_length(Sequence)) %>%
+      filter((Length >= min.length) & (Length <= max.length))
+      mutate(Header = str_c(str_c(genome.id, str_c("RMS", 1:n()), sep = "_"), Header, sep = " "))
+    if(nrow(fsa) == 0){
       if(verbose) cat("found no RMS-fragments within min and max length!\n")
       fsa <- tibble(Header = NULL, Sequence = NULL)
+    } else {
+      if(verbose) cat("found", nrow(fsa), "RMS-fragments\n")
     }
   } else {
     if(verbose) cat("found no RMS-fragments!\n")

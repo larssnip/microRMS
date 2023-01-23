@@ -129,7 +129,7 @@ ggd <- ggdendrogram(dendro_data(tree),
 print(ggd)
 ```
 
-All branches look deep and nice here, with correlation distances above 0.9. If branches get too shallow (correlation distance close to zero) in this tree, the genomes in that clade will be diffcult/impossible to separate since they share too many fragments. The solution to this is to cluster the genomes, which is illustrated in the next tutorial below.
+All branches look deep and nice here, with correlation distances above 0.9. If branches get too shallow (correlation distance close to zero) in this tree, the genomes in such clades will be difficult/impossible to separate since they share too many fragments. The solution to this is to cluster the genomes, which is illustrated in the next tutorial below.
 
 
 
