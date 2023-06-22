@@ -85,7 +85,7 @@ genomeClustering <- function(rms.obj, max.corr = 0.80, verbose = TRUE){
     if(verbose) cat("resulted in", length(unique(clst)), "clusters\n")
   }
   clst.tbl <- tibble(genome_id = genome_id[is.medoide],
-                     members_genome_id = tapply(genome_id, clsustering, str_c, collapse = ","))
+                     members_genome_id = tapply(genome_id, clustering, str_c, collapse = ","))
   
   if(verbose) cat("...pruning the data structure...\n")
   rms.obj$Genome.tbl <- clst.tbl %>%
