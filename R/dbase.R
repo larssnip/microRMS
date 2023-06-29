@@ -125,7 +125,7 @@ RMSobject <- function(genome.tbl, frg.dir, vsearch.exe = "vsearch", identity = 0
   for(j in 1:nrow(genome.tbl)){
     if(verbose) cat("genome", j, "/", nrow(genome.tbl), "\r")
     uc.tbl %>%
-      filter(Genome.id == genome.tbl$genome_id[j]) %>%
+      filter(Genome.id == genome.tbl$genome_file[j]) %>%
       group_by(Cluster) %>%
       summarise(Count = n()) -> tbl
     cpn[match(tbl$Cluster, cluster.tbl$Cluster),j] <- tbl$Count
